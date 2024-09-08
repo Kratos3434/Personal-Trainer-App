@@ -1,0 +1,26 @@
+{
+  "dev": {
+    "awscloudformation": {
+      "AuthRoleName": "amplify-ptabackend-dev-686f2-authRole",
+      "UnauthRoleArn": "arn:aws:iam::767828746182:role/amplify-ptabackend-dev-686f2-unauthRole",
+      "AuthRoleArn": "arn:aws:iam::767828746182:role/amplify-ptabackend-dev-686f2-authRole",
+      "Region": "ca-central-1",
+      "DeploymentBucketName": "amplify-ptabackend-dev-686f2-deployment",
+      "UnauthRoleName": "amplify-ptabackend-dev-686f2-unauthRole",
+      "StackName": "amplify-ptabackend-dev-686f2",
+      "StackId": "arn:aws:cloudformation:ca-central-1:767828746182:stack/amplify-ptabackend-dev-686f2/021c5790-6e22-11ef-80fd-0ae15a6a3c8d",
+      "AmplifyAppId": "d25df00c2cbtjn"
+    },
+    "categories": {
+      "function": {
+        "serverRESTv1": {
+          "deploymentBucketName": "amplify-ptabackend-dev-686f2-deployment",
+          "s3Key": "amplify-builds/serverRESTv1-6532556239746b57346d-build.zip"
+        }
+      },
+      "api": {
+        "serverREST": {}
+      }
+    }
+  }
+}
