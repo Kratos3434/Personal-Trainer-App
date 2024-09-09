@@ -14,9 +14,24 @@ There are two branches, **main** and **development**.
 
 # Pushing and Pulling
 Once you are ready to push/publish your code do these steps to avoid any merge conflicts in production:
-- enter the command **git status** to check any changes that you made. If you don't want a file to be committed, type: **git restore <filename>**.
+- enter the command **git status** to check any changes that you made. If you don't want a file to be committed, type: **git restore "filename"**.
 - next, do **git add .** to add all of the changes that you made for staging.
 - next, do **git commit -m "Commit Message (What changes did u do)"** to commit your changes and make it ready to be published.
 - next, pull the latest code from the development branch, do **git pull origin development:development**.
 - next, if there are merge conflicts, resolve it locally.
 - lastly, if there are no more conflicts, do **git push origin development:development** to only push to the development branch.
+
+# Response Types
+- For successful request please put status code **200** and the response should be:
+{
+  status: true,
+  message: "Any message",
+  data: data  
+}
+
+- For unsuccessful request put status code **400** and the response should be:
+
+{
+  status: false,
+  error: "error message",
+}
