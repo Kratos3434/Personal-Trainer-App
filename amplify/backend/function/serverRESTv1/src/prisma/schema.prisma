@@ -31,4 +31,6 @@ model Profile {
   lastName String
   dob DateTime
   gender String
+  createdAt DateTime @default(now())
+  updatedAt DateTime?
 }
