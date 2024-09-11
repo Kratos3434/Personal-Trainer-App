@@ -5,7 +5,7 @@
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
   binaryTargets = ["rhel-openssl-1.0.x", "native"]
 }
 
@@ -15,23 +15,54 @@ datasource db {
 }
 
 model UserAccount {
+  id        Int       @id @default(autoincrement())
+  email     String    @unique
+  password  String
+  profile   Profile?
+  otp OTP?
+  verified  Boolean   @default(false)
+  privider String?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime?
+}
+
+model OTP {
   id Int @id @default(autoincrement())
-  email String @unique
-  password String
-  profile Profile?
-  verified Boolean @default(false)
+  userId Int @unique
+  userAccount UserAccount @relation(fields: [userId], references: [id])
   createdAt DateTime @default(now())
   updatedAt DateTime?
 }
 
 model Profile {
-  id Int @id @default(autoincrement())
-  userId Int @unique
-  userAccount UserAccount @relation(fields: [userId], references: [id])
-  firstName String
-  lastName String
-  dob DateTime
-  gender String
-  createdAt DateTime @default(now())
-  updatedAt DateTime?
+  id                Int             @id @default(autoincrement())
+  userId            Int             @unique
+  userAccount       UserAccount     @relation(fields: [userId], references: [id])
+  firstName         String
+  lastName          String
+  dob               DateTime
+  gender            String
+  BodyMeasurementId Int @unique
+  initMeasurement   BodyMeasurement @relation(fields: [BodyMeasurementId], references: [id])
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime?
+}
+
+model BodyMeasurement {
+  id      Int      @id @default(autoincrement())
+  weight  Float
+  date    DateTime @default(now())
+  chest   Int
+  abdomen Int
+  thigh   Int
+  bypassMeasurementFlag Boolean
+  bodyFatPercent        Float
+  muscleMass            Float
+  profile               Profile?
+}
+
+model equipmentStatus {
+  id                  Int    @id @default(autoincrement())
+  equipmentStatusDesc String
+  equipmentWeight     Int
 }
