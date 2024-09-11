@@ -21,13 +21,14 @@ model UserAccount {
   profile   Profile?
   otp OTP?
   verified  Boolean   @default(false)
-  privider String?
+  provider String?
   createdAt DateTime  @default(now())
   updatedAt DateTime?
 }
 
 model OTP {
   id Int @id @default(autoincrement())
+  otp String
   userId Int @unique
   userAccount UserAccount @relation(fields: [userId], references: [id])
   createdAt DateTime @default(now())
@@ -42,8 +43,8 @@ model Profile {
   lastName          String
   dob               DateTime
   gender            String
-  BodyMeasurementId Int @unique
-  initMeasurement   BodyMeasurement @relation(fields: [BodyMeasurementId], references: [id])
+  bodyMeasurementId Int @unique
+  initMeasurement   BodyMeasurement @relation(fields: [bodyMeasurementId], references: [id])
   createdAt         DateTime        @default(now())
   updatedAt         DateTime?
 }
