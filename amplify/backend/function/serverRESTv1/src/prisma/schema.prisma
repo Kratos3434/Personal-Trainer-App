@@ -18,7 +18,6 @@ model UserAccount {
   id Int @id @default(autoincrement())
   email String @unique
   password String
-  profile Profile?
   createdAt DateTime @default(now())
   updatedAt DateTime?
 }
@@ -31,11 +30,26 @@ model Profile {
   lastName String
   dob DateTime
   gender String
+  BodyMeasurementId Int
+  initMeasurement BodyMeasurement @relation(fields: [BodyMeasurementId], references: [id])
   createdAt DateTime @default(now())
   updatedAt DateTime?
 }
 
 model BodyMeasurement {
   id Int @id @default(autoincrement())
+  weight Float
   date DateTime @default(now())
+  chest Int
+  abdomen Int
+  thigh Int
+  bypassMeasurementFlag Boolean
+  bodyFatPercent Float
+  muscleMass Float
+}
+
+model equipmentStatus {
+  id Int @id @default(autoincrement())
+  equipmentStatusDesc String
+  equipmentWeight Int
 }
