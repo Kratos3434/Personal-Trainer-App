@@ -26,6 +26,7 @@ class Email {
             <div>
                 <p>Welcome to  <b>Personal Trainer App</b> Enter the code below to activate your account</p>
                 <b>${otp}</b>
+                <p>This will expire in 24 hours</p>
                 <p>Thank you,</p>
                 <p>Personal Trainer App Team</p>
             </div>

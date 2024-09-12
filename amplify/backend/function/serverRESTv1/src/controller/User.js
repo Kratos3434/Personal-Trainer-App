@@ -5,6 +5,7 @@ const fs = require('fs');
 const jwt = require('jsonwebtoken');
 const randomString = require('randomstring');
 const Email = require('./Email');
+const Otp = require('./Otp');
 
 class User {
     /**
@@ -32,7 +33,27 @@ class User {
 
             if (!result) throw "Incorrect email or password";
 
-            if (!user.verified) throw "Account not verified, please check your inbox for the code";
+            const profile = await prisma.profile.findUnique({
+                where: {
+                    userId: user.id
+                },
+                include: {
+                    userAccount: {
+                        select: {
+                            email: true
+                        }
+                    }
+                }
+            });
+
+            if (!user.verified) {
+                return res.status(401).json({
+                    status: false,
+                    error: "Account not verified, please check your inbox for the OTP code",
+                    verified: false,
+                    data: profile
+                });
+            }
 
             const privateKey = fs.readFileSync('privateKey.key');
 
@@ -47,8 +68,9 @@ class User {
                 secure: true
             });
 
-            res.status(200).json({status: true, data: null, message: "Log in successful"});
+            res.status(200).json({status: true, data: profile, message: "Log in successful"});
         } catch (err) {
+            console.log(err)
             res.status(400).json({status: false, error: err});
         }   
     }
@@ -133,6 +155,50 @@ class User {
             res.status(200).json({status: true, data: null, message: "Sign up successful"});
         } catch (err) {
             console.log(err);
+            res.status(400).json({status: false, error: err});
+        }
+    }
+
+    /**
+     * 
+     * @param {Request} req 
+     * @param {Response} res 
+     */
+    static async verify(req, res) {
+        const { otp } = req.params;
+        try {
+            if (!otp) throw "Otp is missing";
+
+            const userOtp = await prisma.oTP.findUnique({
+                where: {
+                    otp
+                },
+                include: {
+                    userAccount: {
+                        select: {
+                            verified: true
+                        }
+                    }
+                }
+            });
+
+            if (!userOtp) throw "Invalid Otp";
+            if (userOtp.userAccount.verified) throw "User is already verified";
+
+            if (Otp.isOneDayOld(userOtp.createdAt)) throw "This Otp have expired";
+
+            await prisma.userAccount.update({
+                where: {
+                    id: userOtp.userId
+                },
+                data: {
+                    verified: true,
+                    updatedAt: new Date()
+                }
+            });
+
+            res.status(200).json({status: true, data: null, message: "User verified"});
+        } catch (err) {
             res.status(400).json({status: false, error: err});
         }
     }
