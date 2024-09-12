@@ -88,21 +88,31 @@ class User {
                 }
             });
 
-            await prisma.userAccount.update({
-                where: {
-                    id: newUser.id
-                },
+            await prisma.profile.create({
                 data: {
-                    profile: {
-                        create: {
-                            firstName,
-                            lastName,
-                            dob: new Date(dob),
-                            gender,
-                        }
-                    }
+                    firstName,
+                    lastName,
+                    dob: new Date(dob),
+                    gender,
+                    userId: newUser.id
                 }
             });
+
+            // await prisma.userAccount.update({
+            //     where: {
+            //         id: newUser.id
+            //     },
+            //     data: {
+            //         profile: {
+            //             create: {
+            //                 firstName,
+            //                 lastName,
+            //                 dob: new Date(dob),
+            //                 gender,
+            //             }
+            //         }
+            //     }
+            // });
 
             //!TODO: Generate a unique code to send to the user's email
             const otp = randomString.generate({
