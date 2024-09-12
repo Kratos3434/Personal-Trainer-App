@@ -28,7 +28,7 @@ model UserAccount {
 
 model OTP {
   id Int @id @default(autoincrement())
-  otp String
+  otp String @unique
   userId Int @unique
   userAccount UserAccount @relation(fields: [userId], references: [id])
   createdAt DateTime @default(now())
@@ -43,8 +43,7 @@ model Profile {
   lastName          String
   dob               DateTime
   gender            String
-  bodyMeasurementId Int @unique
-  initMeasurement   BodyMeasurement @relation(fields: [bodyMeasurementId], references: [id])
+  bodyMeasurement BodyMeasurement?
   createdAt         DateTime        @default(now())
   updatedAt         DateTime?
 }
@@ -59,7 +58,8 @@ model BodyMeasurement {
   bypassMeasurementFlag Boolean
   bodyFatPercent        Float
   muscleMass            Float
-  profile               Profile?
+  profileId Int @unique
+  profile Profile @relation(fields: [profileId], references: [id])
 }
 
 model equipmentStatus {

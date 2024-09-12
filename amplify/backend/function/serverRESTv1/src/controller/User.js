@@ -3,6 +3,8 @@ const { Request, Response } = require('express');
 const bcrypt = require('bcryptjs');
 const fs = require('fs');
 const jwt = require('jsonwebtoken');
+const randomString = require('randomstring');
+const Email = require('./Email');
 
 class User {
     /**
@@ -24,7 +26,7 @@ class User {
 
             if (!user) throw "Incorrect email or password";
             //Check for the provider
-
+            if (user.provider) throw "Incorrect email or password";
 
             const result = await bcrypt.compare(password, user.password);
 
@@ -65,6 +67,7 @@ class User {
             if (!firstName) throw "First name is required";
             if (!lastName) throw "Last name is required";
             if (!dob) throw "Date of birth is required";
+            if (!(new Date(dob) instanceof Date && !isNaN(new Date(dob)))) throw "Date of birth is not valid";
             if (!gender) throw "Gender is required";
             if (password !== password2) throw "Passwords do not match";
 
@@ -85,22 +88,41 @@ class User {
                 }
             });
 
-            await prisma.profile.create({
+            await prisma.userAccount.update({
+                where: {
+                    id: newUser.id
+                },
                 data: {
-                    firstName,
-                    lastName,
-                    dob,
-                    gender,
-                    userId: newUser.id
+                    profile: {
+                        create: {
+                            firstName,
+                            lastName,
+                            dob: new Date(dob),
+                            gender,
+                        }
+                    }
                 }
             });
 
             //!TODO: Generate a unique code to send to the user's email
+            const otp = randomString.generate({
+                length: 6,
+                charset: 'numeric'
+            });
 
+            await prisma.oTP.create({
+                data: {
+                    otp: otp,
+                    userId: newUser.id
+                }
+            });
+
+            await Email.sendOtp(email, otp);
             /////
 
             res.status(200).json({status: true, data: null, message: "Sign up successful"});
         } catch (err) {
+            console.log(err);
             res.status(400).json({status: false, error: err});
         }
     }
