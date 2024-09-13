@@ -71,7 +71,7 @@ class User {
             res.status(200).json({status: true, data: profile, message: "Log in successful"});
         } catch (err) {
             console.log(err)
-            res.status(400).json({status: false, error: err});
+            res.status(400).json({status: false, error: err, verified: true});
         }   
     }
 
@@ -119,22 +119,6 @@ class User {
                     userId: newUser.id
                 }
             });
-
-            // await prisma.userAccount.update({
-            //     where: {
-            //         id: newUser.id
-            //     },
-            //     data: {
-            //         profile: {
-            //             create: {
-            //                 firstName,
-            //                 lastName,
-            //                 dob: new Date(dob),
-            //                 gender,
-            //             }
-            //         }
-            //     }
-            // });
 
             //!TODO: Generate a unique code to send to the user's email
             const otp = randomString.generate({
