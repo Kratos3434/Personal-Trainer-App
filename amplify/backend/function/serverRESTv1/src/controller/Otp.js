@@ -36,8 +36,12 @@ class Otp {
             });
 
             if (!userOtp) throw "User does not exist";
-            if (userOtp.userAccount.verified) throw "User is already verified";
-            if (!Otp.isOneDayOld(userOtp.createdAt)) throw "Please check your inbox for the OTP";
+            //if (userOtp.userAccount.verified) throw "User is already verified";
+            if (userOtp.userAccount.verified) {
+                if (!Otp.isTenMinutesOld(userOtp.createdAt)) return res.status(200).json({status: true, data: null, message: "Otp sent below ten minutes"});
+            } else {
+                if (!Otp.isOneDayOld(userOtp.createdAt)) throw "Please check your inbox for the OTP";
+            }
 
             const otp = randomString.generate({
                 length: 6,
@@ -74,6 +78,18 @@ class Otp {
         const diffInDays = diffInMs / (1000 * 60 * 60 * 24);
 
         return diffInDays >= 1;
+    }
+
+    /**
+     * 
+     * @param {Date} date 
+     */
+    static isTenMinutesOld(date) {
+        const tenMinutesInMs = 10 * 60 * 1000;
+        const now = new Date();
+        const difference = now - date;
+
+        return difference >= tenMinutesInMs;
     }
 }
 

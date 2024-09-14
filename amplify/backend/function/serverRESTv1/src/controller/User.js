@@ -171,18 +171,80 @@ class User {
 
             if (Otp.isOneDayOld(userOtp.createdAt)) throw "This Otp have expired";
 
+            const today = new Date();
+            const yesterday = new Date(today);
+            yesterday.setDate(today.getDate()-1);
+
             await prisma.userAccount.update({
                 where: {
                     id: userOtp.userId
                 },
                 data: {
                     verified: true,
-                    updatedAt: new Date()
+                    updatedAt: new Date(),
+                    createdAt: yesterday
                 }
             });
 
             res.status(200).json({status: true, data: null, message: "User verified"});
         } catch (err) {
+            res.status(400).json({status: false, error: err});
+        }
+    }
+
+    /**
+     * 
+     * @param {Request} req 
+     * @param {Response} res 
+     */
+    static async forgotPassword(req, res) {
+        const { password, password2, otp } = req.body;
+        try {
+            if (!password) throw "Password is missing";
+            if (!password2) throw "Please confirm your password";
+            if (password !== password2) throw "Passwords to not match";
+            if (!otp) throw "Otp is missing";
+
+            const userOtp = await prisma.oTP.findUnique({
+                where: {
+                    otp
+                }
+            });
+
+            if (!userOtp) throw "Invalid Otp";
+
+            if (Otp.isTenMinutesOld(userOtp.createdAt)) throw "This otp have expired";
+
+            const hashedPassword = await bcrypt.hash(password, 10);
+
+            await prisma.userAccount.update({
+                where: {
+                    id: userOtp.userId
+                },
+                data: {
+                    password: hashedPassword,
+                    updatedAt: new Date()
+                }
+            });
+
+
+            const today = new Date();
+            const yesterday = new Date(today);
+            yesterday.setDate(today.getDate()-1);
+
+            await prisma.oTP.update({
+                where: {
+                    otp
+                },
+                data: {
+                    createdAt: yesterday,
+                    updatedAt: new Date()
+                }
+            });
+
+            res.status(200).json({status: true, data: null, message: "Password changed successfuly"});
+
+        } catch (err) { 
             res.status(400).json({status: false, error: err});
         }
     }
