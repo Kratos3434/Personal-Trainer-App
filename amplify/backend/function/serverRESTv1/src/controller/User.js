@@ -248,6 +248,45 @@ class User {
             res.status(400).json({status: false, error: err});
         }
     }
+
+    /**
+     * 
+     * @param {Request} req 
+     * @param {Response} res 
+     */
+    static async loginWithProvider(req, res) {
+        const { email, provider, name } = req.body;
+        try {
+            if (!email) throw "Email is required";
+            if (!provider) throw "Provider is required";
+            if (!name) throw "Name is required";
+            
+            const splitName = name.split(" ");
+            const firstName = splitName[0];
+            const lastName = splitName[splitName.length -1];
+
+            const newUser = await prisma.userAccount.create({
+                data: {
+                    email,
+                    verified: true,
+                    password: "xxxxxxxxx",
+                    provider
+                }
+            });
+
+            const newUserProfile = await prisma.profile.create({
+                data: {
+                    firstName,
+                    lastName,
+                    userId: newUser.id
+                }
+            });
+
+            res.status(200).json({status: true, data: newUserProfile, message: "New user created"});
+        } catch (err) {
+            res.status(400).json({status: false, error: err});
+        }   
+    }
 }
 
 module.exports = User;
