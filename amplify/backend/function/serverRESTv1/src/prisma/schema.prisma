@@ -41,8 +41,8 @@ model Profile {
   userId            Int?             @unique
   firstName         String
   lastName          String
-  dob               DateTime
-  gender            String
+  dob               DateTime?
+  gender            String?
   bodyMeasurementId Int? @unique
   initBodyMeasurement BodyMeasurement? @relation(fields: [bodyMeasurementId], references: [id])
   createdAt         DateTime        @default(now())
