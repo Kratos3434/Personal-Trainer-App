@@ -1,4 +1,5 @@
 const prisma = require('../prismaInstance');
+const Authorization = require('./Authorization');
 
 class Profile {
     /**
@@ -11,17 +12,14 @@ class Profile {
 
         if (!dob) throw "Email is required";
         if (!gender) throw "password is required";
-
+        
         const privateKey = fs.readFileSync('privateKey.key');
 
-        const authHeader = req.headers['authorization'];
-        const token = authHeader && authHeader.split(' ')[1];
-
-        const decoded = jwt.verify(token, privateKey);
-
-        const userId = decoded.id;
-
         try {
+            const decoded = Authorization.decodeToken(req.headers.authorization);
+
+            const userId = decoded.id;
+
             const updatedProfile = await prisma.profile.update({
                 where: {
                     userId: userId,
