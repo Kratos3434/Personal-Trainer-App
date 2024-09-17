@@ -2,6 +2,11 @@ const prisma = require('../prismaInstance');
 const Authorization = require('./Authorization');
 
 class Profile {
+    /**
+     * 
+     * @param {Request} req 
+     * @param {Response} res 
+     */
     static async saveProfile(req, res) {
         const { dob, gender } = req.body;
 
@@ -17,6 +22,7 @@ class Profile {
                 data : {
                     dob: new Date(dob),
                     gender,
+                    updatedAt: new Date(),
                 }
             })
 
