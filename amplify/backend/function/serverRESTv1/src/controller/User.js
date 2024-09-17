@@ -259,6 +259,44 @@ class User {
             if (!provider) throw "Provider is required";
             if (!name) throw "Name is required";
             
+            const user = await prisma.userAccount.findUnique({
+                where: {
+                    email
+                }
+            });
+
+            //if user exists, send a token for login
+            if (user) {
+                const userProfile = await prisma.profile.findUnique({
+                    where: {
+                        userId: user.id
+                    },
+                    include: {
+                        userAccount: {
+                            select: {
+                                email: true
+                            }
+                        }
+                    }
+                });
+
+                const privateKey = fs.readFileSync('privateKey.key');
+
+                const token = jwt.sign({email: user.email, id: user.id}, privateKey, {
+                    expiresIn: '30 days',
+                    algorithm: 'RS256'
+                });
+    
+                res.cookie("token", token, {
+                    httpOnly: true,
+                    maxAge: 2629743744,
+                    secure: true
+                });
+
+                return res.status(200).json({status: true, data: userProfile, message: "Login successful"});
+
+            }
+
             const splitName = name.split(" ");
             const firstName = splitName[0];
             const lastName = splitName[splitName.length -1];
