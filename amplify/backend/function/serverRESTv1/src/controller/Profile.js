@@ -1,6 +1,11 @@
 const prisma = require('../prismaInstance');
 
 class Profile {
+    /**
+     * 
+     * @param {Request} req 
+     * @param {Response} res 
+     */
     static async saveProfile(req, res) {
         const { dob, gender } = req.body;
         const privateKey = fs.readFileSync('privateKey.key');
