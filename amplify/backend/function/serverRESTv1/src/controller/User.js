@@ -81,16 +81,16 @@ class User {
      * @param {Response} res 
      */
     static async signup(req, res) {
-        const { email, password, password2, firstName, lastName, dob, gender } = req.body;
+        const { email, password, password2, firstName, lastName } = req.body;
         try {
             if (!email) throw "Email is required";
             if (!password) throw "password is required";
             if (!password2) throw "Please confirm your password";
             if (!firstName) throw "First name is required";
             if (!lastName) throw "Last name is required";
-            if (!dob) throw "Date of birth is required";
-            if (!(new Date(dob) instanceof Date && !isNaN(new Date(dob)))) throw "Date of birth is not valid";
-            if (!gender) throw "Gender is required";
+            // if (!dob) throw "Date of birth is required";
+            // if (!(new Date(dob) instanceof Date && !isNaN(new Date(dob)))) throw "Date of birth is not valid";
+            // if (!gender) throw "Gender is required";
             if (password !== password2) throw "Passwords do not match";
 
             const user = await prisma.userAccount.findUnique({
@@ -114,8 +114,6 @@ class User {
                 data: {
                     firstName,
                     lastName,
-                    dob: new Date(dob),
-                    gender,
                     userId: newUser.id
                 }
             });
