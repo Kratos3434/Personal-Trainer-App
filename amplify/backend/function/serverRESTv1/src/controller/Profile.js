@@ -25,6 +25,7 @@ class Profile {
                 data : {
                     dob: new Date(dob),
                     gender,
+                    updatedAt: new Date(),
                 }
             })
 
