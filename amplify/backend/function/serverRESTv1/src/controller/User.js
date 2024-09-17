@@ -81,16 +81,16 @@ class User {
      * @param {Response} res 
      */
     static async signup(req, res) {
-        const { email, password, password2, firstName, lastName, dob, gender } = req.body;
+        const { email, password, password2, firstName, lastName } = req.body;
         try {
             if (!email) throw "Email is required";
             if (!password) throw "password is required";
             if (!password2) throw "Please confirm your password";
             if (!firstName) throw "First name is required";
             if (!lastName) throw "Last name is required";
-            if (!dob) throw "Date of birth is required";
-            if (!(new Date(dob) instanceof Date && !isNaN(new Date(dob)))) throw "Date of birth is not valid";
-            if (!gender) throw "Gender is required";
+            // if (!dob) throw "Date of birth is required";
+            // if (!(new Date(dob) instanceof Date && !isNaN(new Date(dob)))) throw "Date of birth is not valid";
+            // if (!gender) throw "Gender is required";
             if (password !== password2) throw "Passwords do not match";
 
             const user = await prisma.userAccount.findUnique({
@@ -114,8 +114,6 @@ class User {
                 data: {
                     firstName,
                     lastName,
-                    dob: new Date(dob),
-                    gender,
                     userId: newUser.id
                 }
             });
@@ -261,6 +259,44 @@ class User {
             if (!provider) throw "Provider is required";
             if (!name) throw "Name is required";
             
+            const user = await prisma.userAccount.findUnique({
+                where: {
+                    email
+                }
+            });
+
+            //if user exists, send a token for login
+            if (user) {
+                const userProfile = await prisma.profile.findUnique({
+                    where: {
+                        userId: user.id
+                    },
+                    include: {
+                        userAccount: {
+                            select: {
+                                email: true
+                            }
+                        }
+                    }
+                });
+
+                const privateKey = fs.readFileSync('privateKey.key');
+
+                const token = jwt.sign({email: user.email, id: user.id}, privateKey, {
+                    expiresIn: '30 days',
+                    algorithm: 'RS256'
+                });
+    
+                res.cookie("token", token, {
+                    httpOnly: true,
+                    maxAge: 2629743744,
+                    secure: true
+                });
+
+                return res.status(200).json({status: true, data: userProfile, message: "Login successful"});
+
+            }
+
             const splitName = name.split(" ");
             const firstName = splitName[0];
             const lastName = splitName[splitName.length -1];
