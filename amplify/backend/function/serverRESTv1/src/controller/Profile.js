@@ -10,6 +10,11 @@ class Profile {
     static async saveProfile(req, res) {
         const { dob, gender } = req.body;
 
+        if (!dob) throw "Email is required";
+        if (!gender) throw "password is required";
+        
+        const privateKey = fs.readFileSync('privateKey.key');
+
         try {
             const decoded = Authorization.decodeToken(req.headers.authorization);
 
