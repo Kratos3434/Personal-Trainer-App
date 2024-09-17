@@ -10,14 +10,11 @@ class Profile {
     static async saveProfile(req, res) {
         const { dob, gender } = req.body;
 
-        if (!dob) throw "Email is required";
-        if (!gender) throw "password is required";
-        
-        const privateKey = fs.readFileSync('privateKey.key');
-
         try {
-            const decoded = Authorization.decodeToken(req.headers.authorization);
+            if (!dob) throw "Date of Birth is required";
+            if (!gender) throw "Gender is required";
 
+            const decoded = Authorization.decodeToken(req.headers.authorization);
             const userId = decoded.id;
 
             const updatedProfile = await prisma.profile.update({
@@ -35,7 +32,6 @@ class Profile {
         } catch (err) {
             res.status(400).json({status: false, error: err});
         }
-
 
     }
 }
