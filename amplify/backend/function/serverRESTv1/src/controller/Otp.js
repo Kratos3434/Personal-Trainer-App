@@ -59,7 +59,11 @@ class Otp {
                 }
             });
 
-            await Email.sendOtp(email, otp);
+            if (userOtp.userAccount.verified) {
+                await Email.sendForgotOtp(email, otp);
+            } else {
+                await Email.sendOtp(email, otp);
+            }
 
             res.status(200).json({status: true, data: null, message: "Otp sent"});
         } catch (err) {
