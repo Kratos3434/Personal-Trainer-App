@@ -318,6 +318,19 @@ class User {
                 }
             });
 
+            const privateKey = fs.readFileSync('privateKey.key');
+
+            const token = jwt.sign({email: newUser.email, id: newUser.id}, privateKey, {
+                expiresIn: '30 days',
+                algorithm: 'RS256'
+            });
+    
+            res.cookie("token", token, {
+                httpOnly: true,
+                maxAge: 2629743744,
+                secure: true
+            });
+
             res.status(200).json({status: true, data: newUserProfile, message: "New user created"});
         } catch (err) {
             res.status(400).json({status: false, error: err});
