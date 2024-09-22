@@ -134,6 +134,10 @@ class FitnessUtils {
         const ageGroup = FitnessUtils.getAgeGroup(age);
         const chart = FitnessUtils.bodyFatClassification[ageGroup];
 
+        if (age <= 17) {
+            return "Result is based on\nthe min age 18";
+        }
+
         for (const range of chart) {
             if (bodyFat >= range[gender].min && bodyFat <= range[gender].max) {
                 return range.classification;
@@ -170,6 +174,7 @@ class FitnessUtils {
      * @returns {String}
      */
     static getAgeGroup(age) {
+        if (age <= 17) return "18-29";
         if (age >= 18 && age <= 29) return "18-29";
         if (age >= 30 && age <= 39) return "30-39";
         if (age >= 40 && age <= 49) return "40-49";

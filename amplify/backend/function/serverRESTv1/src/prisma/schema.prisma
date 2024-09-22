@@ -53,9 +53,9 @@ model BodyMeasurement {
   id      Int      @id @default(autoincrement())
   weight  Float
   date    DateTime @default(now())
-  chest   Int
-  abdomen Int
-  thigh   Int
+  chest   Int?
+  abdomen Int?
+  thigh   Int?
   bypassMeasurementFlag Boolean
   bodyFatPercent        Float
   muscleMass            Float
