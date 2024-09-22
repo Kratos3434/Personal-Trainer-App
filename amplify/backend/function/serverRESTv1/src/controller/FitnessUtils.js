@@ -23,12 +23,10 @@ class FitnessUtils {
 
             if (!measurement) throw "Body measurement does not exist";
 
-            const { weight, chest, abdomen, thigh } = measurement;
-
-            if (!weight) throw "Weight is required";
-            if (!chest) throw "Chest is required";
-            if (!abdomen) throw "Abdomen is required";
-            if (!thigh) throw "Thigh is required";
+            const { bodyFatPercent, muscleMass } = measurement;
+            
+            if (!bodyFatPercent) throw "Body Fat % is required";
+            if (!muscleMass) throw "Lean Muscle Mass is required";
 
             // Query dob and gender from Profile table
             const decoded = decodeToken(req.headers.authorization);
@@ -52,13 +50,7 @@ class FitnessUtils {
             if (!gender) throw "Gender is required";
 
             // Calculate age
-            const age = FitnessUtils.getAgeFromDob(dob);
-
-            // Get body fat
-            const bodyFatPercent = FitnessUtils.calculateBodyFat(age, gender, chest, abdomen, thigh);
-
-            // Get lean muscle mass
-            const leanMuscleMass = FitnessUtils.calculateLeanMuscleMass(weight, bodyFatPercent);
+            const age = FitnessUtils.getAgeFromDob(dob);           
 
             // Get classification (Athletes, Fit, Average, etc)
             const classification = FitnessUtils.getClassificationResult(bodyFatPercent, age, gender);
@@ -67,7 +59,7 @@ class FitnessUtils {
             const ranges = FitnessUtils.getClassificationRanges(age, gender);
 
             // Send all data to the Fitness Result Page for display
-            res.status(200).json({ bodyFatPercent, leanMuscleMass, classification, ranges });
+            res.status(200).json({ bodyFatPercent, muscleMass, classification, ranges });
         } catch (err) {
             console.error("Error calculating body fat:", err);
             res.status(400).json({ error: err.message });
@@ -142,6 +134,10 @@ class FitnessUtils {
         const ageGroup = FitnessUtils.getAgeGroup(age);
         const chart = FitnessUtils.bodyFatClassification[ageGroup];
 
+        if (age <= 17) {
+            return "Result is based on\nthe min age 18";
+        }
+
         for (const range of chart) {
             if (bodyFat >= range[gender].min && bodyFat <= range[gender].max) {
                 return range.classification;
@@ -178,6 +174,7 @@ class FitnessUtils {
      * @returns {String}
      */
     static getAgeGroup(age) {
+        if (age <= 17) return "18-29";
         if (age >= 18 && age <= 29) return "18-29";
         if (age >= 30 && age <= 39) return "30-39";
         if (age >= 40 && age <= 49) return "40-49";
