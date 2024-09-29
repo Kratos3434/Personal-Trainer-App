@@ -6,8 +6,43 @@ const jwt = require('jsonwebtoken');
 const randomString = require('randomstring');
 const Email = require('./Email');
 const Otp = require('./Otp');
+const Authorization = require('./Authorization');
 
 class User {
+    /**
+     * Method to return latest user information (Add more as we build more tables)
+     * @param {Request} req 
+     * @param {Response} res 
+     */
+    static async globalState(req, res) {
+        const decoded = Authorization.decodeToken(req.headers.authorization);
+        const userId = decoded.id;
+
+        try {
+            if (!userId) throw "userId not found";
+
+            const profile = await prisma.profile.findUnique({
+                where: {
+                  userId: userId
+                }
+              });
+
+            if (!profile) throw "Profile does not exist";
+
+            const initialMeasurement = await prisma.bodyMeasurement.findUnique({
+                where: {
+                    id: profile.bodyMeasurementId
+                }
+            });
+
+            if (!initialMeasurement) throw "No Initial measurement is found"
+
+            res.status(200).json({profile, initialMeasurement});
+        } catch (err) {
+            res.status(400).json({status: false, error: err});
+        }
+    }
+
     /**
      * 
      * @param {Request} req 
