@@ -44,6 +44,7 @@ model Profile {
   dob               DateTime?
   gender            String?
   bodyMeasurementId Int? @unique
+  weeklyRoutines WeeklyRoutine[]
   initBodyMeasurement BodyMeasurement? @relation(fields: [bodyMeasurementId], references: [id])
   createdAt         DateTime        @default(now())
   updatedAt         DateTime?
@@ -66,4 +67,93 @@ model equipmentStatus {
   id                  Int    @id @default(autoincrement())
   equipmentStatusDesc String
   equipmentWeight     Int
+}
+
+model WeeklyRoutine {
+  id Int @id @default(autoincrement())
+  profileId Int
+  profile Profile @relation(fields: [profileId], references: [id])
+  startDate DateTime
+  endDate DateTime
+  daysPerWeek Int
+  workoutEnvironmentId Int
+  workoutEnvironment WorkoutEnvironment @relation(fields: [workoutEnvironmentId], references: [id])
+  dailyRoutines DailyRoutine[]
+}
+
+model WorkoutEnvironment {
+  id Int @id @default(autoincrement())
+  weeklyRoutines WeeklyRoutine[]
+  exercises WorkoutEnvironmentJuction[]
+}
+
+model DailyRoutine {
+  id Int @id @default(autoincrement())
+  dayNumber Int
+  weeklyRoutineId Int
+  weeklyRoutine WeeklyRoutine @relation(fields: [weeklyRoutineId], references: [id])
+  exerciseDetails ExerciseDetails[]
+}
+
+model ExerciseDetails {
+  id Int @id @default(autoincrement())
+  sets Int
+  reps Int
+  youtubeURL String
+  dailyRoutineId Int
+  dailyRoutine DailyRoutine @relation(fields: [dailyRoutineId], references: [id])
+  exerciseId Int
+  exercise Exercise @relation(fields: [exerciseId], references: [id])
+}
+
+model Exercise {
+  id Int @id @default(autoincrement())
+  name String
+  intensity Int
+  defaultSets Int
+  defaultReps Int
+  exerciseDetails ExerciseDetails[]
+  levelId Int
+  level Level @relation(fields: [levelId], references: [id])
+  workoutEnvironments WorkoutEnvironmentJuction[]
+  requiredEquipmentId Int
+  requiredEquipment RequiredEquipment @relation(fields: [requiredEquipmentId], references: [id])
+  muscleGroups MuscleGroupJunction[]
+}
+
+model Level {
+  id Int @id @default(autoincrement())
+  description String
+  exercises Exercise[]
+}
+
+model WorkoutEnvironmentJuction {
+  workoutEnvironmentId Int
+  workoutEnvironment WorkoutEnvironment @relation(fields: [workoutEnvironmentId], references: [id])
+  exerciseId Int
+  exercise Exercise @relation(fields: [exerciseId], references: [id])
+  createdAt DateTime @default(now())
+
+  @@id([workoutEnvironmentId, exerciseId])
+}
+
+model RequiredEquipment {
+  id Int @id @default(autoincrement())
+  description String
+  exercises Exercise[]
+}
+
+model MuscleGroupJunction {
+  exerciseId Int
+  exercise Exercise @relation(fields: [exerciseId], references: [id])
+  muscleGroupId Int
+  muscleGroup MuscleGroup @relation(fields: [muscleGroupId], references: [id])
+
+  @@id([exerciseId, muscleGroupId])
+}
+
+model MuscleGroup {
+  id Int @id @default(autoincrement())
+  description String
+  exercises MuscleGroupJunction[]
 }

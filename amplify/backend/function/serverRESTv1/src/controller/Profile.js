@@ -1,5 +1,6 @@
 const prisma = require('../prismaInstance');
 const Authorization = require('./Authorization');
+const { Request, Response } = require('express');
 
 class Profile {
     /**
