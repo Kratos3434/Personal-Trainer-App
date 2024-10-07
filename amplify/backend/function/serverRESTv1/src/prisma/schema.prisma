@@ -83,8 +83,9 @@ model WeeklyRoutine {
 
 model WorkoutEnvironment {
   id Int @id @default(autoincrement())
+  description String
   weeklyRoutines WeeklyRoutine[]
-  exercises WorkoutEnvironmentJuction[]
+  exercises WorkoutEnvironmentJunction[]
 }
 
 model DailyRoutine {
@@ -115,7 +116,7 @@ model Exercise {
   exerciseDetails ExerciseDetails[]
   levelId Int
   level Level @relation(fields: [levelId], references: [id])
-  workoutEnvironments WorkoutEnvironmentJuction[]
+  workoutEnvironments WorkoutEnvironmentJunction[]
   requiredEquipmentId Int
   requiredEquipment RequiredEquipment @relation(fields: [requiredEquipmentId], references: [id])
   muscleGroups MuscleGroupJunction[]
@@ -127,7 +128,7 @@ model Level {
   exercises Exercise[]
 }
 
-model WorkoutEnvironmentJuction {
+model WorkoutEnvironmentJunction {
   workoutEnvironmentId Int
   workoutEnvironment WorkoutEnvironment @relation(fields: [workoutEnvironmentId], references: [id])
   exerciseId Int

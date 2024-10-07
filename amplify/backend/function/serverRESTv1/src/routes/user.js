@@ -12,7 +12,6 @@ router.post("/signin/provider", User.loginWithProvider);
 router.get("/profile", Authorization.verifyToken, Profile.getByToken);
 router.patch("/profile/update", Authorization.verifyToken, Profile.update);
 router.post("/profile/enter", Authorization.verifyToken, Profile.saveProfile);
-router.get("/globalState", User.globalState);
 
 //Verify if the users token is valid or if the user is quthorized
 router.get("/authenticate", Authorization.verifyToken, (req, res) => res.status(200).json({status: true, message: "Authorized"}));
