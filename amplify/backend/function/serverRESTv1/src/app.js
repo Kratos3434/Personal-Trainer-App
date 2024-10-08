@@ -5,6 +5,7 @@ const userRouter = require('./routes/user');
 const otpRouter = require('./routes/otp');
 const measurementRouter = require('./routes/measurement');
 const routineRouter = require('./routes/routine');
+const currentRoutineRouter = require('./routes/currentRoutine')
 
 const app = express();
 
@@ -14,6 +15,7 @@ app.use("/user", userRouter);
 app.use("/otp", otpRouter);
 app.use("/measurement", measurementRouter);
 app.use("/routine", routineRouter);
+app.use("/currentRoutine", currentRoutineRouter);
 
 app.listen(HTTP_PORT, () => console.log(`Express server listening on port ${HTTP_PORT}`));
 
