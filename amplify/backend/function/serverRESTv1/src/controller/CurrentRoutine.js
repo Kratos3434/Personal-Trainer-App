@@ -30,12 +30,15 @@ class CurrentRoutine {
                 where: {
                     profileId: profile.id,
                 },
+                orderBy: {
+                    startDate: "desc",
+                },
                 include: {
                     dailyRoutines: {
                         include: {
                             exerciseDetails: {
                                 include: {
-                                    exercise: true
+                                    exercise: true,
                                 }
                             }
                         }
