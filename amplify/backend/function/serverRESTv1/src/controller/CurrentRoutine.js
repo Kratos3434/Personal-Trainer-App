@@ -60,13 +60,13 @@ class CurrentRoutine {
         weeklyRoutine.dailyRoutines.forEach(routine => {
             routine.exerciseDetails.forEach(detail => {
                 detail.exercise.muscleGroups = detail.exercise.muscleGroups.map(mg => ({
-                    id: mg.muscleGroup.id,
+                    id: mg.id,
                     description: mg.muscleGroup.description
                 }));
             });
         });
 
-        return res.status(200).json({ status: true, data: transformedRoutine, message: "Routine retrieved successfully" });
+        return res.status(200).json({ status: true, data: weeklyRoutine, message: "Routine retrieved successfully" });
 
         } catch (err) {
             return res.status(500).json({ status: false, error: err });
