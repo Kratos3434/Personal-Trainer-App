@@ -40,11 +40,7 @@ class CurrentRoutine {
                                 include: {
                                     exercise: {
                                         include: {
-                                            muscleGroups: {
-                                                include: {
-                                                    muscleGroup: true,
-                                                }
-                                            }
+                                            muscleGroups: { include: { muscleGroup: true } }
                                         }
                                     }
                                 }
@@ -59,29 +55,16 @@ class CurrentRoutine {
             return res.status(404).json({ status: false, error: "Weekly routine not found" });
         }
 
-        // Format the weekly routine object
-        const transformedRoutine = {
-            startDate: weeklyRoutine.startDate,
-            endDate: weeklyRoutine.endDate,
-            daysPerWeek: weeklyRoutine.daysPerWeek,
-            dailyRoutines: weeklyRoutine.dailyRoutines.map(routine => ({
-                dayNumber: routine.dayNumber,
-                exerciseDetails: routine.exerciseDetails.map(exerciseDetail => ({
-                    exerciseId: exerciseDetail.exerciseId,
-                    sets: exerciseDetail.sets,
-                    reps: exerciseDetail.reps,
-                    youtubeURL: exerciseDetail.youtubeURL,
-                    exercise: {
-                        exerciseId: exerciseDetail.exercise.id,
-                        name: exerciseDetail.exercise.name,
-                        muscleGroups: exerciseDetail.exercise.muscleGroups.map(mg => ({
-                            id: mg.muscleGroup.id,
-                            description: mg.muscleGroup.description,
-                        })),
-                    },
-                })),
-            })),
-        };
+        // Format the weekly routine object to include the information about the targeted muscle groups
+        // excluding muscle junction info
+        weeklyRoutine.dailyRoutines.forEach(routine => {
+            routine.exerciseDetails.forEach(detail => {
+                detail.exercise.muscleGroups = detail.exercise.muscleGroups.map(mg => ({
+                    id: mg.muscleGroup.id,
+                    description: mg.muscleGroup.description
+                }));
+            });
+        });
 
         return res.status(200).json({ status: true, data: transformedRoutine, message: "Routine retrieved successfully" });
 
