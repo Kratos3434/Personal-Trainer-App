@@ -9,6 +9,8 @@ router.post("/signup", User.signup);
 router.get("/verify/:otp", User.verify);
 router.post("/forgot", User.forgotPassword);
 router.post("/signin/provider", User.loginWithProvider);
+router.get("/profile", Authorization.verifyToken, Profile.getByToken);
+router.patch("/profile/update", Authorization.verifyToken, Profile.update);
 router.post("/profile/enter", Authorization.verifyToken, Profile.saveProfile);
 
 //Verify if the users token is valid or if the user is quthorized
