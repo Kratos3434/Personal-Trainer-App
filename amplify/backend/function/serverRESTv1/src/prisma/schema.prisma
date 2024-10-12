@@ -101,6 +101,7 @@ model ExerciseDetails {
   sets Int
   reps Int
   youtubeURL String
+  thumbnailURL String?
   dailyRoutineId Int
   dailyRoutine DailyRoutine @relation(fields: [dailyRoutineId], references: [id])
   exerciseId Int

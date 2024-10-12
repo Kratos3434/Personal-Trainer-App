@@ -60,11 +60,12 @@ class Routine {
                     for (let exercise of dailyRoutine.exerciseDetails) {
                         await prisma.exerciseDetails.create({
                             data: {
-                            dailyRoutineId: savedDailyRoutine.id,  // link to daily routine
-                            exerciseId: exercise.exerciseId,
-                            sets: exercise.sets,
-                            reps: exercise.reps,
-                            youtubeURL: exercise.youtubeURL,
+                                dailyRoutineId: savedDailyRoutine.id,  // link to daily routine
+                                exerciseId: exercise.exerciseId,
+                                sets: exercise.sets,
+                                reps: exercise.reps,
+                                youtubeURL: exercise.youtubeURL,
+                                thumbnailURL: exercise.thumbnailURL
                             },
                         });
                     }
