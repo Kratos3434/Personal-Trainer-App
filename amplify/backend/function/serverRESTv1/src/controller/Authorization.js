@@ -39,6 +39,25 @@ class Authorization {
             res.status(401).json({status: false, error: err});
         }
     }
+
+    /**
+     * 
+     * @param {Request} req 
+     * @param {Response} res 
+     * @param {NextFunction} next 
+     */
+    static verifyAdmin(req, res, next) {
+        try {
+            const token = req.headers.authorization;
+            if (!token) throw "Unauthorized";
+
+            if (token !== process.env.ADMIN_PASS) throw "Unauthorized";
+
+            next();
+        } catch (err) {
+            res.status(401).json({status: false, error: err});
+        }
+    }
 }
 
 module.exports = Authorization;

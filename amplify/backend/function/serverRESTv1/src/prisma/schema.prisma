@@ -120,6 +120,7 @@ model Exercise {
   requiredEquipmentId Int
   requiredEquipment RequiredEquipment @relation(fields: [requiredEquipmentId], references: [id])
   muscleGroups MuscleGroupJunction[]
+  videos Video[]
 }
 
 model Level {
@@ -157,4 +158,13 @@ model MuscleGroup {
   id Int @id @default(autoincrement())
   description String
   exercises MuscleGroupJunction[]
+}
+
+model Video {
+  id Int @id @default(autoincrement())
+  exerciseId Int
+  exercise Exercise @relation(fields: [exerciseId], references: [id])
+  url String
+  thumbnail String
+  title String
 }
