@@ -4,7 +4,7 @@ class DailyRoutine {
 
     static async getDailyRoutine(req, res) {
         const { dailyRoutineId } = req.params;
-
+        
         try {
             if (!dailyRoutineId) {
                 return res.status(400).json({ message: "dailyRoutineId is required" });
@@ -35,6 +35,7 @@ class DailyRoutine {
                 },
             });
 
+
             console.log(JSON.stringify(exerciseDetails, null, 3)); // For debugging.
 
             res.status(200).json({status: true, data: exerciseDetails, message: "DailyRounte Successfuly Retrieved"});
@@ -46,14 +47,9 @@ class DailyRoutine {
     static async updateDailyRoutine(req, res) {
         const data = req.body; // Get the updated exercise details from the request
 
-        if (array.length === 0) {
-            return res.status(400).json({ message: 'Empty Data' });
-        }
-
         if (!Array.isArray(data)) {
             return res.status(400).json({ message: 'Invalid data format' });
         }
-
  
         try {
             // Assume you are using Prisma or any ORM to update the database
