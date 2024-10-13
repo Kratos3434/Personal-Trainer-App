@@ -29,6 +29,7 @@ class DailyRoutine {
                             },
                             level: true, 
                             requiredEquipment: true,
+                            videos: true
                         },
                     },
                 },
@@ -146,6 +147,7 @@ class DailyRoutine {
                     },
                     level: true, 
                     requiredEquipment: true,
+                    videos: true
                 },
             });
 
