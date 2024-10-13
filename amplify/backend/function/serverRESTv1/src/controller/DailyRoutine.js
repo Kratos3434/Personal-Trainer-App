@@ -29,7 +29,6 @@ class DailyRoutine {
                             },
                             level: true, 
                             requiredEquipment: true,
-                            videos: true
                         },
                     },
                 },
@@ -63,6 +62,7 @@ class DailyRoutine {
                     sets: detail.sets,
                     reps: detail.reps,
                     youtubeURL: detail.youtubeURL,
+                    thumbnailURL: detail.thumbnailURL,
                     exerciseId: detail.exerciseId
                 },
             });
