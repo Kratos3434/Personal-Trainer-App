@@ -25,10 +25,16 @@ class CurrentRoutine {
 
             if (!profile) throw "Profile does not exist";
 
+            // Get the current date
+            const currentDate = new Date().toISOString();
+
             // Fetch the weekly routine for the current week, related daily routines, exercise details, exercises and their targeted muscle groups
             const weeklyRoutine = await prisma.weeklyRoutine.findFirst({
                 where: {
                     profileId: profile.id,
+                    endDate: {
+                        gt: currentDate,
+                    },
                 },
                 orderBy: {
                     startDate: "desc",
