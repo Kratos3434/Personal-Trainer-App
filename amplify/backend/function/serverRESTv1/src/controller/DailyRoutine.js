@@ -42,51 +42,39 @@ class DailyRoutine {
         }
     }
 
-    static async saveDailyRoutine(req, res) {
-        const { dailyRoutine, exerciseDetails } = req.body;
-        try {
+    static async updateDailyRoutine(req, res) {
+        const data = req.body; // Get the updated exercise details from the request
 
-            if (!dailyRoutine) throw "Daily Routine object is required";
-            if (!exerciseDetails) throw "Exercise Detail object is required";
+        if (array.length === 0) {
+            return res.status(400).json({ message: 'Empty Data' });
+        }
 
+        if (!Array.isArray(data)) {
+            return res.status(400).json({ message: 'Invalid data format' });
+        }
 
-            // Start transaction (Objects only save to the db when no errors occur during the entire process)
-            const result = await prisma.$transaction(async (prisma) => {
-                
-                /* Update Daily Routine <May Not Needed>
-                const updatedRoutine = await prisma.dailyRoutine.update({
-                    where: { id: dailyRoutine.dailyRoutineId }, // Specify the ID of the routine to update
-                    data: {
-                        dayNumber: dailyRoutine.dayNumber, // Update dayNumber
-                        weeklyRoutineId: dailyRoutine.weeklyRoutineId, // Update weeklyRoutineId
-                    },
-                });
+        // Temporarily commented out for testng.
+        // try {
+        //     // Assume you are using Prisma or any ORM to update the database
+        //     for (const detail of data) {
+        //     // Find the existing exerciseDetail by id and update its fields
+        //     await prisma.exerciseDetails.update({
+        //         where: { 
+        //             id: detail.exerciseDetailId
+        //         },
+        //         data: {
+        //             sets: detail.sets,
+        //             reps: detail.reps,
+        //             youtubeURL: detail.youtubeURL,
+        //             exerciseId: detail.exerciseId
+        //         },
+        //     });
+        //     }
 
-                console.log(updatedRoutine); // Debugging
-                */
-
-
-                // update Exercise Details for each daily routine (Multiple)
-                for (let exercise of dailyRoutine.exerciseDetails) {
-                    await prisma.exerciseDetails.update({
-                        where: {
-                            id: exercise.id
-                        },
-                        data: {
-                            dailyRoutineId: dailyRoutine.dailyRoutineId,  // link to daily routine
-                            exerciseId: exercise.exerciseId,
-                            sets: exercise.sets,
-                            reps: exercise.reps,
-                            youtubeURL: exercise.youtubeURL,
-                        },
-                    });
-                }
-                  
-            });   
-            
-            res.status(200).json({ status: true, data: result, message: "Daily Routine Updated successfully" });
-        } catch (err) {
-            res.status(400).json({ status: false, error: err });
+            res.status(200).json({ message: 'Exercise details updated successfully' });
+        } catch (error) {
+            console.error('Error updating exercise details:', error);
+            res.status(500).json({ message: 'Failed to update exercise details' });
         }
 
     }
