@@ -53,23 +53,23 @@ class DailyRoutine {
             return res.status(400).json({ message: 'Invalid data format' });
         }
 
-        // Temporarily commented out for testng.
-        // try {
-        //     // Assume you are using Prisma or any ORM to update the database
-        //     for (const detail of data) {
-        //     // Find the existing exerciseDetail by id and update its fields
-        //     await prisma.exerciseDetails.update({
-        //         where: { 
-        //             id: detail.exerciseDetailId
-        //         },
-        //         data: {
-        //             sets: detail.sets,
-        //             reps: detail.reps,
-        //             youtubeURL: detail.youtubeURL,
-        //             exerciseId: detail.exerciseId
-        //         },
-        //     });
-        //     }
+ 
+        try {
+            // Assume you are using Prisma or any ORM to update the database
+            for (const detail of data) {
+            // Find the existing exerciseDetail by id and update its fields
+            await prisma.exerciseDetails.update({
+                where: { 
+                    id: detail.exerciseDetailId
+                },
+                data: {
+                    sets: detail.sets,
+                    reps: detail.reps,
+                    youtubeURL: detail.youtubeURL,
+                    exerciseId: detail.exerciseId
+                },
+            });
+            }
 
             res.status(200).json({ message: 'Exercise details updated successfully' });
         } catch (error) {
@@ -161,7 +161,9 @@ class DailyRoutine {
             console.error("Error fetching exercises:", error);
             return res.status(500).json({ message: "Internal server error", error: error.message });
         }
+    
     }
 }
+   
 
 module.exports = DailyRoutine;
