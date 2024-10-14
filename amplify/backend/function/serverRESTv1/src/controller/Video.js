@@ -39,7 +39,7 @@ class Video {
                 }
             });
 
-            const index = Math.floor(Math.random() * 10);
+            const index = Math.floor(Math.random() * videos.length); // Changed to videos.length to prevent error when videos are less than 10
 
             res.status(200).json({status: true, data: videos[index]});
         } catch (err) {

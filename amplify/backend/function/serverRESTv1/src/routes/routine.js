@@ -19,6 +19,8 @@ router.get("/exercise", Routine.getExercises);
 router.get("/dailyRoutine/:dailyRoutineId", DailyRoutine.getDailyRoutine);
 
 // Get One Exercise for Refresh
-router.get("/getOneExercise", DailyRoutine.refreshOneExercise)
+router.get("/getOneExercise", DailyRoutine.refreshOneExercise);
+
+router.put("/updateDailyRoutine", DailyRoutine.updateDailyRoutine);
 
 module.exports = router;
