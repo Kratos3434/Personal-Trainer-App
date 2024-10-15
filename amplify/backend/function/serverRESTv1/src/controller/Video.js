@@ -13,7 +13,7 @@ class Video {
             const maxResults = 10;
             const videoDuration = "short";
 
-            const res = await fetch(`https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&q=${encodeURIComponent(name)}&videoDuration=${videoDuration}&maxResults=${maxResults}&key=${process.env.YOUTUBE_API_KEY}`);
+            const res = await fetch(`https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&q=${encodeURIComponent(name)}&videoDuration=${videoDuration}&order=viewCount&maxResults=${maxResults}&key=${process.env.YOUTUBE_API_KEY}`);
             const data = await res.json();
 
             return data.items;
@@ -39,7 +39,7 @@ class Video {
                 }
             });
 
-            const index = Math.floor(Math.random() * 10);
+            const index = Math.floor(Math.random() * videos.length); // Changed to videos.length to prevent error when videos are less than 10
 
             res.status(200).json({status: true, data: videos[index]});
         } catch (err) {

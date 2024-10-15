@@ -26,6 +26,16 @@ app.use("/exercise", exerciseRouter);
 app.use("/workoutEnvironmentJunction", workoutEnvironmentJunctionRouter);
 app.use("/muscleGroupJunction", muscleGroupJunction);
 
+
+// Exercise setup workflow, only set to true when creating new exercises and related junctions
+const createExerciseAndJunctions = require('./controller/exerciseCreationWorkflow.js');
+const CREATE_EXERCISE_AND_JUNCTIONS = false; // Only set to true when use
+if (CREATE_EXERCISE_AND_JUNCTIONS) {
+    createExerciseAndJunctions()
+        .then(() => console.log('Exercise setup completed successfully.'))
+        .catch(err => console.error('Error during exercise setup:', err.message));
+}
+
 app.listen(HTTP_PORT, () => console.log(`Express server listening on port ${HTTP_PORT}`));
 
 module.exports = app;

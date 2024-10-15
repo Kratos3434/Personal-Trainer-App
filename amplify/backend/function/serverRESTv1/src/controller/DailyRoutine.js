@@ -4,7 +4,7 @@ class DailyRoutine {
 
     static async getDailyRoutine(req, res) {
         const { dailyRoutineId } = req.params;
-
+        
         try {
             if (!dailyRoutineId) {
                 return res.status(400).json({ message: "dailyRoutineId is required" });
@@ -34,6 +34,7 @@ class DailyRoutine {
                 },
             });
 
+
             console.log(JSON.stringify(exerciseDetails, null, 3)); // For debugging.
 
             res.status(200).json({status: true, data: exerciseDetails, message: "DailyRounte Successfuly Retrieved"});
@@ -42,51 +43,35 @@ class DailyRoutine {
         }
     }
 
-    static async saveDailyRoutine(req, res) {
-        const { dailyRoutine, exerciseDetails } = req.body;
+    static async updateDailyRoutine(req, res) {
+        const data = req.body; // Get the updated exercise details from the request
+
+        if (!Array.isArray(data)) {
+            return res.status(400).json({ message: 'Invalid data format' });
+        }
+ 
         try {
+            // Assume you are using Prisma or any ORM to update the database
+            for (const detail of data) {
+            // Find the existing exerciseDetail by id and update its fields
+            await prisma.exerciseDetails.update({
+                where: { 
+                    id: detail.exerciseDetailId
+                },
+                data: {
+                    sets: detail.sets,
+                    reps: detail.reps,
+                    youtubeURL: detail.youtubeURL,
+                    thumbnailURL: detail.thumbnailURL,
+                    exerciseId: detail.exerciseId
+                },
+            });
+            }
 
-            if (!dailyRoutine) throw "Daily Routine object is required";
-            if (!exerciseDetails) throw "Exercise Detail object is required";
-
-
-            // Start transaction (Objects only save to the db when no errors occur during the entire process)
-            const result = await prisma.$transaction(async (prisma) => {
-                
-                /* Update Daily Routine <May Not Needed>
-                const updatedRoutine = await prisma.dailyRoutine.update({
-                    where: { id: dailyRoutine.dailyRoutineId }, // Specify the ID of the routine to update
-                    data: {
-                        dayNumber: dailyRoutine.dayNumber, // Update dayNumber
-                        weeklyRoutineId: dailyRoutine.weeklyRoutineId, // Update weeklyRoutineId
-                    },
-                });
-
-                console.log(updatedRoutine); // Debugging
-                */
-
-
-                // update Exercise Details for each daily routine (Multiple)
-                for (let exercise of dailyRoutine.exerciseDetails) {
-                    await prisma.exerciseDetails.update({
-                        where: {
-                            id: exercise.id
-                        },
-                        data: {
-                            dailyRoutineId: dailyRoutine.dailyRoutineId,  // link to daily routine
-                            exerciseId: exercise.exerciseId,
-                            sets: exercise.sets,
-                            reps: exercise.reps,
-                            youtubeURL: exercise.youtubeURL,
-                        },
-                    });
-                }
-                  
-            });   
-            
-            res.status(200).json({ status: true, data: result, message: "Daily Routine Updated successfully" });
-        } catch (err) {
-            res.status(400).json({ status: false, error: err });
+            res.status(200).json({ message: 'Exercise details updated successfully' });
+        } catch (error) {
+            console.error('Error updating exercise details:', error);
+            res.status(500).json({ message: 'Failed to update exercise details' });
         }
 
     }
@@ -158,6 +143,7 @@ class DailyRoutine {
                     },
                     level: true, 
                     requiredEquipment: true,
+                    videos: true
                 },
             });
 
@@ -173,7 +159,9 @@ class DailyRoutine {
             console.error("Error fetching exercises:", error);
             return res.status(500).json({ message: "Internal server error", error: error.message });
         }
+    
     }
 }
+   
 
 module.exports = DailyRoutine;
