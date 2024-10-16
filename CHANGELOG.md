@@ -21,6 +21,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Weekly Routine API (https://github.com/Kratos3434/Personal-Trainer-App/issues/63).
 - Weekly Routine Page (https://github.com/Kratos3434/Personal-Trainer-App/issues/62).
+- Current Week's Routine API (https://github.com/Kratos3434/Personal-Trainer-App/issues/53).
+- Current Week's Routine Page (https://github.com/Kratos3434/Personal-Trainer-App/issues/52).
 
 ### Changed
 - Changed from live fetching from YouTube for each query to pre-fetching YouTube data to the database.
