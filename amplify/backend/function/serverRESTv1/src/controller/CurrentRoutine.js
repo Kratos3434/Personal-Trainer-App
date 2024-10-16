@@ -38,7 +38,7 @@ class CurrentRoutine {
                         include: {
                             exerciseDetails: {
                                 orderBy: {
-                                    sets: "asc", // Adjust based on your desired field
+                                    id: "asc", // Order exercise details by their ID
                                 },
                                 include: {
                                     exercise: {
