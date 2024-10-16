@@ -37,6 +37,9 @@ class CurrentRoutine {
                     dailyRoutines: {
                         include: {
                             exerciseDetails: {
+                                orderBy: {
+                                    sets: "asc", // Adjust based on your desired field
+                                },
                                 include: {
                                     exercise: {
                                         include: {
