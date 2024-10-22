@@ -1,4 +1,4 @@
-require('dotenv').config(); 
+require('dotenv').config({path: '../.env'}); 
 const fetch = require('node-fetch');
 
 const endpoint = `https://7u45qve0xl.execute-api.ca-central-1.amazonaws.com/dev`;
@@ -7,7 +7,7 @@ const adminToken = process.env.ADMIN_PASS;
 // Data Entry
 // name, intensity, defaultSets, defaultReps, levelId, requiredEquipmentId, muscleGroupIds[], workoutEnvironmentIds[]
 const exercisesArray = [
-    ["Glute Kick Back", 1, 3, 15, 1, 0, [11], [3]],
+    ["Squat Jump", 1, 2, 20, 1, 0, [4], [1,2,3]],
     //["Squat", 2, 3, 10, 2, [1], [1]],
 ];
 
@@ -55,7 +55,6 @@ async function createExercise(exerciseData) {
             },
             body: JSON.stringify(exerciseData)
         });
-
         const result = await response.json();
 
         if (!response.ok) {
@@ -133,5 +132,9 @@ async function createEnvironmentJunctions(exerciseId, workoutEnvironmentIds) {
         throw err; 
     }
 };
+
+createExerciseAndJunctions()
+        .then(() => console.log('Exercise setup completed successfully.'))
+        .catch(err => console.error('Error during exercise setup:', err.message));
 
 module.exports = createExerciseAndJunctions;
