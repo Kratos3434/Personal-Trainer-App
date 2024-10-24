@@ -37,6 +37,9 @@ class CurrentRoutine {
                     dailyRoutines: {
                         include: {
                             exerciseDetails: {
+                                orderBy: {
+                                    id: "asc", // Order exercise details by their ID
+                                },
                                 include: {
                                     exercise: {
                                         include: {

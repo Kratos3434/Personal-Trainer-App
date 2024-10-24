@@ -26,7 +26,7 @@ class FitnessUtils {
             const { bodyFatPercent, muscleMass } = measurement;
             
             if (!bodyFatPercent) throw "Body Fat % is required";
-            if (!muscleMass) throw "Lean Muscle Mass is required";
+            if (!muscleMass) throw "Lean Body Mass is required";
 
             // Query dob and gender from Profile table
             const decoded = decodeToken(req.headers.authorization);
@@ -112,7 +112,7 @@ class FitnessUtils {
     }
 
     /**
-     * Method to get lean muscle mass
+     * Method to get lean body mass
      * @param {number} weight 
      * @param {number} bodyFatPercent 
      * @returns {number}
@@ -185,44 +185,44 @@ class FitnessUtils {
     // Body Fat chart based on gender and age group
     static bodyFatClassification = {
         "18-29": [
-            { classification: "Essential Fat", M: { min: 2, max: 5 }, F: { min: 10, max: 13 } },
-            { classification: "Athletes", M: { min: 5.1, max: 9.3 }, F: { min: 13.1, max: 17 } },
-            { classification: "Fit", M: { min: 9.4, max: 14 }, F: { min: 17.1, max: 20.5 } },
-            { classification: "Average", M: { min: 14.1, max: 17.5 }, F: { min: 20.6, max: 23.6 } },
-            { classification: "Below Average", M: { min: 17.6, max: 22.5 }, F: { min: 23.7, max: 27.6 } },
-            { classification: "Poor", M: { min: 22.6, max: Infinity }, F: { min: 27.7, max: Infinity } }
+            { classification: "Essential Fat", M: { min: 2, max: 8 }, F: { min: 10, max: 14 } },
+            { classification: "Athletes", M: { min: 8.1, max: 10.5 }, F: { min: 13.1, max: 16.5 } },
+            { classification: "Fit", M: { min: 10.6, max: 14.8 }, F: { min: 16.6, max: 19.4 } },
+            { classification: "Average", M: { min: 14.9, max: 18.6 }, F: { min: 19.5, max: 22.7 } },
+            { classification: "Below Average", M: { min: 18.7, max: 23.1 }, F: { min: 22.8, max: 27.1 } },
+            { classification: "Poor", M: { min: 23.2, max: Infinity }, F: { min: 27.2, max: Infinity } }
         ],
         "30-39": [
-            { classification: "Essential Fat", M: { min: 2, max: 5 }, F: { min: 10, max: 13 } },
-            { classification: "Athletes", M: { min: 5.1, max: 13.8 }, F: { min: 13.1, max: 17.9 } },
-            { classification: "Fit", M: { min: 13.9, max: 17.4 }, F: { min: 18, max: 21.5 } },
-            { classification: "Average", M: { min: 17.5, max: 20.4 }, F: { min: 21.6, max: 24.8 } },
-            { classification: "Below Average", M: { min: 20.5, max: 24.1 }, F: { min: 24.9, max: 29.2 } },
-            { classification: "Poor", M: { min: 24.2, max: Infinity }, F: { min: 29.3, max: Infinity } }
+            { classification: "Essential Fat", M: { min: 2, max: 8 }, F: { min: 10, max: 14 } },
+            { classification: "Athletes", M: { min: 8.1, max: 14.5 }, F: { min: 14.1, max: 17.4 } },
+            { classification: "Fit", M: { min: 14.6, max: 18.2 }, F: { min: 17.5, max: 20.8 } },
+            { classification: "Average", M: { min: 18.3, max: 21.3 }, F: { min: 20.9, max: 24.6 } },
+            { classification: "Below Average", M: { min: 21.4, max: 24.9 }, F: { min: 24.7, max: 29.1 } },
+            { classification: "Poor", M: { min: 25, max: Infinity }, F: { min: 29.2, max: Infinity } }
         ],
         "40-49": [
-            { classification: "Essential Fat", M: { min: 2, max: 5 }, F: { min: 10, max: 13 } },
-            { classification: "Athletes", M: { min: 5.1, max: 16.2 }, F: { min: 13.1, max: 21.2 } },
-            { classification: "Fit", M: { min: 16.3, max: 19.5 }, F: { min: 21.3, max: 24.8 } },
-            { classification: "Average", M: { min: 19.6, max: 22.4 }, F: { min: 24.9, max: 28 } },
-            { classification: "Below Average", M: { min: 22.5, max: 26 }, F: { min: 28.1, max: 32 } },
-            { classification: "Poor", M: { min: 26.1, max: Infinity }, F: { min: 32.1, max: Infinity } }
+            { classification: "Essential Fat", M: { min: 2, max: 8 }, F: { min: 10, max: 14 } },
+            { classification: "Athletes", M: { min: 8.1, max: 17.4 }, F: { min: 14.1, max: 19.8 } },
+            { classification: "Fit", M: { min: 17.5, max: 20.6 }, F: { min: 19.9, max: 23.8 } },
+            { classification: "Average", M: { min: 20.7, max: 23.4 }, F: { min: 23.9, max: 27.6 } },
+            { classification: "Below Average", M: { min: 23.5, max: 26.6 }, F: { min: 27.7, max: 31.9 } },
+            { classification: "Poor", M: { min: 26.7, max: Infinity }, F: { min: 32, max: Infinity } }
         ],
         "50-59": [
-            { classification: "Essential Fat", M: { min: 2, max: 5 }, F: { min: 10, max: 13 } },
-            { classification: "Athletes", M: { min: 5.1, max: 17.8 }, F: { min: 13.1, max: 24.9 } },
-            { classification: "Fit", M: { min: 17.9, max: 21.2 }, F: { min: 25, max: 28.4 } },
-            { classification: "Average", M: { min: 21.3, max: 24 }, F: { min: 28.5, max: 31.5 } },
-            { classification: "Below Average", M: { min: 24.1, max: 27.4 }, F: { min: 31.6, max: 35.5 } },
-            { classification: "Poor", M: { min: 27.5, max: Infinity }, F: { min: 35.6, max: Infinity } }
+            { classification: "Essential Fat", M: { min: 2, max: 8 }, F: { min: 10, max: 14 } },
+            { classification: "Athletes", M: { min: 8.1, max: 19.1 }, F: { min: 14.1, max: 22.5 } },
+            { classification: "Fit", M: { min: 19.2, max: 22.1 }, F: { min: 22.6, max: 27 } },
+            { classification: "Average", M: { min: 22.2, max: 24.6 }, F: { min: 27.1, max: 30.4 } },
+            { classification: "Below Average", M: { min: 24.7, max: 27.8 }, F: { min: 30.5, max: 34.5 } },
+            { classification: "Poor", M: { min: 27.9, max: Infinity }, F: { min: 34.6, max: Infinity } }
         ],
         "60+": [
-            { classification: "Essential Fat", M: { min: 2, max: 5 }, F: { min: 10, max: 13 } },
-            { classification: "Athletes", M: { min: 5.1, max: 18.3 }, F: { min: 13.1, max: 25 } },
-            { classification: "Fit", M: { min: 18.4, max: 21.9 }, F: { min: 25.1, max: 29.2 } },
-            { classification: "Average", M: { min: 22, max: 25 }, F: { min: 29.3, max: 32.4 } },
-            { classification: "Below Average", M: { min: 25.1, max: 28.4 }, F: { min: 32.5, max: 36.5 } },
-            { classification: "Poor", M: { min: 28.5, max: Infinity }, F: { min: 36.6, max: Infinity } }
+            { classification: "Essential Fat", M: { min: 2, max: 8 }, F: { min: 10, max: 14 } },
+            { classification: "Athletes", M: { min: 8.1, max: 19.7 }, F: { min: 14.1, max: 23.2 } },
+            { classification: "Fit", M: { min: 19.8, max: 22.6 }, F: { min: 23.3, max: 27.9 } },
+            { classification: "Average", M: { min: 22.7, max: 25.2 }, F: { min: 28, max: 31.3 } },
+            { classification: "Below Average", M: { min: 25.3, max: 28.4 }, F: { min: 31.4, max: 35.4 } },
+            { classification: "Poor", M: { min: 28.5, max: Infinity }, F: { min: 35.5, max: Infinity } }
         ]
     };
 }

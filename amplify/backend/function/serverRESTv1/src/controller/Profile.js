@@ -29,7 +29,7 @@ class Profile {
                 }
             })
 
-            res.status(200).json({status: true, data: null, message: "Profile Saved"});
+            res.status(200).json({status: true, data: updatedProfile, message: "Profile Saved"});
         } catch (err) {
             res.status(400).json({status: false, error: err});
         }
