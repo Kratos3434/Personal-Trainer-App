@@ -43,7 +43,12 @@ model Profile {
   lastName          String
   dob               DateTime?
   gender            String?
+  height            Int?
   bodyMeasurementId Int? @unique
+  levelId           Int?             @default(1)
+  level             Level?           @relation(fields: [levelId], references: [id])
+  intensityId       Int?             @default(1)
+  intensity         Intensity?       @relation(fields: [intensityId], references: [id])  
   weeklyRoutines WeeklyRoutine[]
   initBodyMeasurement BodyMeasurement? @relation(fields: [bodyMeasurementId], references: [id])
   createdAt         DateTime        @default(now())
@@ -99,7 +104,8 @@ model DailyRoutine {
 model ExerciseDetails {
   id Int @id @default(autoincrement())
   sets Int
-  reps Int
+  reps Int?
+  minutes Int?
   youtubeURL String
   thumbnailURL String?
   dailyRoutineId Int
@@ -111,9 +117,12 @@ model ExerciseDetails {
 model Exercise {
   id Int @id @default(autoincrement())
   name String
+  typeId Int?
+  exerciseType ExerciseType? @relation(fields: [typeId], references: [id])
   intensity Int
   defaultSets Int
-  defaultReps Int
+  defaultReps Int?
+  minutes Int?
   exerciseDetails ExerciseDetails[]
   levelId Int
   level Level @relation(fields: [levelId], references: [id])
@@ -124,10 +133,17 @@ model Exercise {
   videos Video[]
 }
 
+model ExerciseType {
+  id Int @id @default(autoincrement())
+  description String
+  exercises Exercise[]
+}
+
 model Level {
   id Int @id @default(autoincrement())
   description String
   exercises Exercise[]
+  profiles Profile[]
 }
 
 model WorkoutEnvironmentJunction {
@@ -168,4 +184,10 @@ model Video {
   url String
   thumbnail String
   title String
+}
+
+model Intensity {
+  id          Int      @id
+  description String?
+  profiles    Profile[]
 }

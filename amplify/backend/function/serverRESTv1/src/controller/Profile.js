@@ -9,11 +9,12 @@ class Profile {
      * @param {Response} res 
      */
     static async saveProfile(req, res) {
-        const { dob, gender } = req.body;
+        const { dob, gender, height } = req.body;
 
         try {
             if (!dob) throw "Date of Birth is required";
             if (!gender) throw "Gender is required";
+            if (!height) throw "Height is required";
 
             const decoded = Authorization.decodeToken(req.headers.authorization);
             const userId = decoded.id;
@@ -25,6 +26,7 @@ class Profile {
                 data : {
                     dob: new Date(dob),
                     gender,
+                    height,
                     updatedAt: new Date(),
                 }
             })
@@ -76,7 +78,7 @@ class Profile {
      * @param {Response} res 
      */
     static async update(req, res) {
-        const { firstName, lastName, dob, gender } = req.body;
+        const { firstName, lastName, dob, gender, height } = req.body;
         try {
             const decoded = Authorization.decodeToken(req.headers.authorization);
 
@@ -94,6 +96,12 @@ class Profile {
             if (gender) {
                 if (!(gender === 'M' || gender === 'F')) {
                     throw "Gender must be M or F";
+                }
+            }
+
+            if (height) {
+                if (isNaN(height)) {
+                    throw "height must be in number"
                 }
             }
 
@@ -115,11 +123,38 @@ class Profile {
                     lastName: lastName ? lastName : profile.lastName,
                     dob: dob ? new Date(dob) : profile.dob,
                     gender: gender ? gender : profile.gender,
+                    height: height ? height : profile.height,
                     updatedAt: new Date()
                 }
             });
 
             res.status(200).json({status: true, message: "Update successful", data: null});
+        } catch (err) {
+            res.status(400).json({status: false, error: err});
+        }
+    }
+
+    static async updateIntensityAndLevel(req, res) {
+        const { intensityId, levelId } = req.body;
+
+        try {
+            if (!intensityId) throw "intensityId is required";
+            if (!levelId) throw "levelId is required";
+
+            const decoded = Authorization.decodeToken(req.headers.authorization);
+            const userId = decoded.id;
+
+            const updatedProfile = await prisma.profile.update({
+                where: {
+                    userId: userId,
+                },
+                data : {
+                    intensityId,
+                    levelId
+                }
+            })
+
+            res.status(200).json({status: true, data: updatedProfile, message: "Profile Saved"});
         } catch (err) {
             res.status(400).json({status: false, error: err});
         }

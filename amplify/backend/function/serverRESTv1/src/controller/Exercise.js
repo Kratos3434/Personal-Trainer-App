@@ -9,14 +9,16 @@ class Exercise {
      * @param {Response} res 
      */
     static async create(req, res) {
-        const { name, intensity, defaultSets, defaultReps, levelId, requiredEquipmentId } = req.body;
+        // name, typeId, intensity, defaultSets, defaultReps(optional), minutes(optional), levelId, requiredEquipmentId
+        const { name, typeId, intensity, defaultSets, defaultReps, minutes, levelId, requiredEquipmentId } = req.body;
         try {
             if (!name) throw "Name is required";
+            if (!typeId === undefined) throw "TypeId is required";
             if (!intensity === undefined) throw "Intensity is required";
             //if (!+intensity) throw "Intensity must be a valid number";
             if (!defaultSets === undefined) throw "Default sets is required";
             //if (!+defaultSets) throw "Default sets must be a valid number";
-            if (!defaultReps === undefined) throw "Default reps is required";
+            if (!defaultReps === null && !minutes === undefined) throw "Either Default reps or minutes is required";
             //if (!+defaultReps) throw "Default reps must be a valid number";
             if (!levelId === undefined) throw "Level id is required";
             //if (!+levelId) throw "Level id must be a valid number";
@@ -34,9 +36,11 @@ class Exercise {
             const newExercise = await prisma.exercise.create({
                 data: {
                     name,
+                    typeId: +typeId,
                     intensity: +intensity,
                     defaultSets: +defaultSets,
                     defaultReps: +defaultReps,
+                    minutes: +minutes,
                     levelId: +levelId,
                     requiredEquipmentId: +requiredEquipmentId
                 }

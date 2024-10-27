@@ -1,28 +1,33 @@
 require('dotenv').config({path: '../.env'}); 
 const fetch = require('node-fetch');
 
-const endpoint = `https://7u45qve0xl.execute-api.ca-central-1.amazonaws.com/dev`;
+let production = true;
+const endpoint = production ? `https://7u45qve0xl.execute-api.ca-central-1.amazonaws.com/dev`: `http://10.10.6.150:8080`; // Must use aws endpoint to fetch videos
 const adminToken = process.env.ADMIN_PASS;
 
 // Data Entry
-// name, intensity, defaultSets, defaultReps, levelId, requiredEquipmentId, muscleGroupIds[], workoutEnvironmentIds[]
+// name, typeId, intensity, defaultSets, defaultReps(optional), minutes(optional), levelId, requiredEquipmentId, muscleGroupIds[], workoutEnvironmentIds[]
 const exercisesArray = [
-    ["Squat Jump", 1, 2, 20, 1, 0, [4], [1,2,3]],
-    //["Squat", 2, 3, 10, 2, [1], [1]],
+    //["Seated Cable Row", 1, 1, 3, 12, null, 1, 3, [10], [1]],
+    //["One Arm Dumbbell Row", 1, 1, 3, 12, null, 1, 1, [10], [1,2]],
+    ["Bent Over Dumbbell Row", 1, 1, 3, 12, null, 1, 1, [10], [1,2]],
+    ["Tripod Dumbbell Row", 1, 1, 3, 12, null, 1, 1, [10], [1,2]],
 ];
 
 // Consolidated workflow
 async function createExerciseAndJunctions() {
     try {
         for (const exerciseData of exercisesArray) {
-            const [name, intensity, defaultSets, defaultReps, levelId, requiredEquipmentId, muscleGroupIds, workoutEnvironmentIds] = exerciseData;
+            const [name, typeId, intensity, defaultSets, defaultReps, minutes, levelId, requiredEquipmentId, muscleGroupIds, workoutEnvironmentIds] = exerciseData;
 
             // Create an exercise object
             const exerciseObj = {
                 name: name,
+                typeId: typeId,
                 intensity: intensity,
                 defaultSets: defaultSets,
                 defaultReps: defaultReps,
+                minutes: minutes,
                 levelId: levelId,
                 requiredEquipmentId: requiredEquipmentId
             };
