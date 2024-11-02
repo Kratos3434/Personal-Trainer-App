@@ -13,6 +13,7 @@ const exerciseRouter = require('./routes/exercise');
 const workoutEnvironmentJunctionRouter = require('./routes/workoutEnvironmentJunction');
 const muscleGroupJunction = require('./routes/muscleGroupJunction');
 const polling = require('./routes/polling');
+const reportRouter = require('./routes/report')
 
 const app = express();
 
@@ -29,6 +30,7 @@ app.use("/exercise", exerciseRouter);
 app.use("/workoutEnvironmentJunction", workoutEnvironmentJunctionRouter);
 app.use("/muscleGroupJunction", muscleGroupJunction);
 app.use("/polling", polling);
+app.use("/report", reportRouter)
 
 app.listen(HTTP_PORT, () => console.log(`Express server listening on port ${HTTP_PORT}`));
 
