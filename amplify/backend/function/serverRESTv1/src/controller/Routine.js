@@ -203,7 +203,7 @@ class Routine {
 
             return isHttpRequest ? res.status(200).json(exercises) : exercises;
         } catch (error) {
-            console.error("Error fetching exercises:", error);
+            console.error(`\n${error}`);
             return isHttpRequest ? res.status(500).json({ message: "Internal server error", error: error.message }) : { message: "Internal server error", error: error.message };
         }
     };

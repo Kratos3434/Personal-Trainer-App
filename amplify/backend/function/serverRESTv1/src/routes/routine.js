@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const Routine = require('../controller/Routine');
 const DailyRoutine = require('../controller/DailyRoutine');
+const Algorithm = require('../controller/Algorithm');
 
 // Save Weekly Routine to db
 router.post("/save", Routine.saveWeeklyRoutine);
@@ -22,5 +23,8 @@ router.get("/dailyRoutine/:dailyRoutineId", DailyRoutine.getDailyRoutine);
 router.get("/getOneExercise", DailyRoutine.refreshOneExercise);
 
 router.put("/updateDailyRoutine", DailyRoutine.updateDailyRoutine);
+
+// Get recommended routine through algorithm
+router.get("/recommendation", Algorithm.getRecommendation);
 
 module.exports = router;

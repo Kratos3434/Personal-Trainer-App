@@ -11,6 +11,7 @@ const videoRouter = require('./routes/video');
 const exerciseRouter = require('./routes/exercise');
 const workoutEnvironmentJunctionRouter = require('./routes/workoutEnvironmentJunction');
 const muscleGroupJunction = require('./routes/muscleGroupJunction');
+const polling = require('./routes/polling');
 
 const app = express();
 
@@ -25,7 +26,7 @@ app.use("/video", videoRouter);
 app.use("/exercise", exerciseRouter);
 app.use("/workoutEnvironmentJunction", workoutEnvironmentJunctionRouter);
 app.use("/muscleGroupJunction", muscleGroupJunction);
-
+app.use("/polling", polling);
 
 app.listen(HTTP_PORT, () => console.log(`Express server listening on port ${HTTP_PORT}`));
 
