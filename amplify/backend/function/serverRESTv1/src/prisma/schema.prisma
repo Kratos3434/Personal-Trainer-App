@@ -204,7 +204,7 @@ model WeeklyProgress {
   bodyMeasurement BodyMeasurement @relation(fields: [bodyMeasurementId], references: [id])
   bodyMeasurementId Int @unique
   report Report?
-  date DateTime
+  date DateTime @default(now())
 }
 
 model Report {
@@ -214,4 +214,5 @@ model Report {
   startDate DateTime
   endDate DateTime
   progressSummary String?
+  created DateTime @default(now())
 }
