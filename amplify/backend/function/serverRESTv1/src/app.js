@@ -7,6 +7,7 @@ const otpRouter = require('./routes/otp');
 const measurementRouter = require('./routes/measurement');
 const routineRouter = require('./routes/routine');
 const currentRoutineRouter = require('./routes/currentRoutine')
+const progressRouter = require('./routes/progress')
 const videoRouter = require('./routes/video');
 const exerciseRouter = require('./routes/exercise');
 const workoutEnvironmentJunctionRouter = require('./routes/workoutEnvironmentJunction');
@@ -21,6 +22,7 @@ app.use("/user", userRouter);
 app.use("/otp", otpRouter);
 app.use("/measurement", measurementRouter);
 app.use("/routine", routineRouter);
+app.use("/progress", progressRouter);
 app.use("/currentRoutine", currentRoutineRouter);
 app.use("/video", videoRouter);
 app.use("/exercise", exerciseRouter);

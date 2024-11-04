@@ -67,14 +67,12 @@ class BodyMeasurement {
         }
       });
 
-      // If no initial body measurement Id is linked to profile, link the current one to it
-      if (!profile.bodyMeasurementId) {
-        await prisma.profile.update({
-          where: { id: profile.id },
-          data: { bodyMeasurementId: bodyMeasurement.id },
-        });
-      }
-
+      // Link new body measurement to the profile
+      await prisma.profile.update({
+        where: { id: profile.id },
+        data: { bodyMeasurementId: bodyMeasurement.id },
+      });
+      
       res.status(200).json({
         status: true,
         data: bodyMeasurement,
