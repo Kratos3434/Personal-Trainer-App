@@ -1,8 +1,58 @@
 const prisma = require("../prismaInstance");
 const Authorization = require("./Authorization");
 
+
+/**
+ * Helper function to assess progress by comparing two body measurements
+ * @param {BodyMeasurement} currentBodyMeasurement 
+ * @param {BodyMeasurement} prevBodyMeasurement 
+ */
+async function assessProgress(currentMeasurementId, prevMeasurementId) {
+    if (!currentMeasurementId || !prevMeasurementId) throw "IDs for both body measurements are required"
+
+    // Retrieve the body measurements for comparison
+    prevBodyMeasurement = await prisma.bodyMeasurement.findUnique({
+        where: {
+            id: prevMeasurementId
+        }
+    });
+
+    if (!prevBodyMeasurement) throw "Can't find previous body measurements!";
+
+    currentBodyMeasurement = await prisma.bodyMeasurement.findUnique({
+        where: {
+            id: currentMeasurementId
+        }
+    });
+
+    if (!currentBodyMeasurement) throw "Can't find current body measurements!";
+
+    // Calculate the differences
+    let fatDiff = currentBodyMeasurement.bodyFatPercent - prevBodyMeasurement.bodyFatPercent;
+    let muscleDiff = currentBodyMeasurement.muscleMass - prevBodyMeasurement.muscleMass;
+
+    // Assess the progress
+    let assess = "";
+
+    if (fatDiff < 0 && muscleDiff > 0) {
+        assess = "Great!";
+    } else if ((fatDiff < 0 && muscleDiff < 0) || (fatDiff > 0 && muscleDiff > 0)) {
+        assess = "Good Job!";  
+    } else {
+        assess = "Push Harder!";
+    }
+
+    return {
+        gainedFat: fatDiff,
+        gainedMuscle: muscleDiff,
+        assess
+    };
+};
+
+
 class WeeklyProgress {
     /**
+     * Save weekly progress to the db
      * @param {Request} req 
      * @param {Response} res 
      */
@@ -125,6 +175,65 @@ class WeeklyProgress {
             res.status(400).json({ status: false, error: err });
         }
     };
+
+
+    /**
+     * Retrieve current week's progress summary information
+     * @param {Request} req 
+     * @param {Response} res 
+     */
+    static async getProgressResults(req, res) {
+        try {
+            const decoded = Authorization.decodeToken(req.headers.authorization);
+            const userId = decoded.id;
+
+            // Get the current user's profileId
+            const profile = await prisma.profile.findUnique({
+                where: {
+                    userId: userId
+                },
+                select: {
+                    id: true,
+                    bodyMeasurementId: true
+                }
+            });
+
+            if (!profile) throw "Profile does not exist";
+
+            // Retrieve two latest body measurements
+            const latestWeeklyProgress = await prisma.weeklyProgress.findMany({
+                where: {
+                    profileId: profile.id
+                },
+                orderBy: { 
+                    id: 'desc' 
+                },
+                take: 2
+            });
+
+            if (latestWeeklyProgress.length === 0) {
+                return res.status(404).json({ message: "Progress not found!" });
+            } 
+            
+            // Get body measurement IDs
+            const currentMeasurementId = latestWeeklyProgress[0].bodyMeasurementId;
+            let prevMeasurementId = null;
+
+            if (latestWeeklyProgress.length === 1) {
+                // Use the initial measurement for comparison if only one progress record exists
+                prevMeasurementId = profile.bodyMeasurementId;
+            } else {
+                prevMeasurementId = latestWeeklyProgress[1].bodyMeasurementId;
+            }
+
+            const result =  await assessProgress(currentMeasurementId, prevMeasurementId);
+
+            res.status(200).json({ status: true, data: result, message: "Progress results retrieved successfully!" });
+        } catch (err) {
+            res.status(400).json({ status: false, error: err });
+        }
+    };
 }
+
 
 module.exports = WeeklyProgress;
