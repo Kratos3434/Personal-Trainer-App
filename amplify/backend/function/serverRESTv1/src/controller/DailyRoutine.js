@@ -61,6 +61,7 @@ class DailyRoutine {
                 data: {
                     sets: detail.sets,
                     reps: detail.reps,
+                    minutes: detail.minutes,
                     youtubeURL: detail.youtubeURL,
                     thumbnailURL: detail.thumbnailURL,
                     exerciseId: detail.exerciseId
@@ -78,7 +79,7 @@ class DailyRoutine {
 
     static async refreshOneExercise(req, res) {
         try {
-            const { name, minIntensity, maxIntensity, levelId, requiredEquipmentId, workoutEnvironmentId, muscleGroups } = req.query;
+            const { name, typeId, minIntensity, maxIntensity, levelId, requiredEquipmentId, workoutEnvironmentId, muscleGroups } = req.query;
 
             // Build query object
             const queryConditions = {};
@@ -88,6 +89,9 @@ class DailyRoutine {
                     contains: name,
                     mode: 'insensitive', // Case-insensitive search
                 };
+            }
+            if (typeId) {
+                queryConditions.typeId = Number(typeId);
             }
             if (minIntensity) {
                 queryConditions.intensity = {

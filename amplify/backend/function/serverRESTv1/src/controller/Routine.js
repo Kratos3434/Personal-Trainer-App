@@ -64,6 +64,7 @@ class Routine {
                                 exerciseId: exercise.exerciseId,
                                 sets: exercise.sets,
                                 reps: exercise.reps,
+                                minutes: exercise.minutes,
                                 youtubeURL: exercise.youtubeURL,
                                 thumbnailURL: exercise.thumbnailURL
                             },
@@ -134,8 +135,11 @@ class Routine {
      * @returns exercise[]
      */
     static async getExercises(req, res) {
-        try {
-            const { name, minIntensity, maxIntensity, levelId, requiredEquipmentId, workoutEnvironmentId, muscleGroups } = req.query;
+        // Accept both http req or object
+        const isHttpRequest = req && req.query !== undefined;        
+
+        try {    
+            const { name, typeId, minIntensity, maxIntensity, levelId, requiredEquipmentId, workoutEnvironmentId, muscleGroups } = isHttpRequest ? req.query : req;
 
             // Build query object
             const queryConditions = {};
@@ -145,6 +149,9 @@ class Routine {
                     contains: name,
                     mode: 'insensitive', // Case-insensitive search
                 };
+            }
+            if (typeId) {
+                queryConditions.typeId = Number(typeId);
             }
             if (minIntensity) {
                 queryConditions.intensity = {
@@ -192,12 +199,12 @@ class Routine {
                 },
             });
 
-            if (!exercises.length) throw "No exercises found matching the criteria";
+            if (!exercises.length) throw `No exercises found matching the criteria: ${isHttpRequest ? JSON.stringify(req.query) : JSON.stringify(req)}`;
 
-            return res.status(200).json(exercises);
+            return isHttpRequest ? res.status(200).json(exercises) : exercises;
         } catch (error) {
-            console.error("Error fetching exercises:", error);
-            return res.status(500).json({ message: "Internal server error", error: error.message });
+            console.error(`\n${error}`);
+            return isHttpRequest ? res.status(500).json({ message: "Internal server error", error: error.message }) : { message: "Internal server error", error: error.message };
         }
     };
 }

@@ -29,7 +29,9 @@ class Video {
      * @param {Response} res 
      */
     static async getByExerciseIdRandom(req, res) {
-        const { exerciseId } = req.params;
+        // Accept both http req or object
+        const isHttpRequest = req && req.params !== undefined;
+        const { exerciseId } = isHttpRequest ? req.params : req;
         try {
             if (exerciseId === undefined) throw "Id is missing";
 
@@ -41,9 +43,9 @@ class Video {
 
             const index = Math.floor(Math.random() * videos.length); // Changed to videos.length to prevent error when videos are less than 10
 
-            res.status(200).json({status: true, data: videos[index]});
+            return isHttpRequest ? res.status(200).json({status: true, data: videos[index]}) : {data: videos[index]};
         } catch (err) {
-            res.status(400).json({status: false, error: err});
+            return isHttpRequest ? res.status(400).json({status: false, error: err}) : {status: false, error: err};
         }
     }
 }

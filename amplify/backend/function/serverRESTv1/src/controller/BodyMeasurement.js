@@ -74,7 +74,7 @@ class BodyMeasurement {
           data: { bodyMeasurementId: bodyMeasurement.id },
         });
       }
-
+      
       res.status(200).json({
         status: true,
         data: bodyMeasurement,

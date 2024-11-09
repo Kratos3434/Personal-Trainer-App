@@ -53,23 +53,34 @@ class CurrentRoutine {
                 }
             });
 
-         // Check if weeklyRoutine is found
-         if (!weeklyRoutine) {
-            return res.status(404).json({ status: false, error: "Weekly routine not found" });
-        }
+            // Check if  weekly routine is found
+            if (!weeklyRoutine) {
+                return res.status(404).json({ status: false, error: "Weekly routine not found" });
+            }
 
-        // Format the weekly routine object to include the information about the targeted muscle groups
-        // excluding muscle junction info
-        weeklyRoutine.dailyRoutines.forEach(routine => {
-            routine.exerciseDetails.forEach(detail => {
-                detail.exercise.muscleGroups = detail.exercise.muscleGroups.map(mg => ({
-                    id: mg.id,
-                    description: mg.muscleGroup.description
-                }));
+            // Check if there is an associated weekly progress for the latest routine
+            const associatedProgress = await prisma.weeklyProgress.findFirst({
+                where: {
+                weeklyRoutineId: weeklyRoutine.id,
+                },
             });
-        });
 
-        return res.status(200).json({ status: true, data: weeklyRoutine, message: "Routine retrieved successfully" });
+            if (associatedProgress) {
+                return res.status(404).json({ status: false, error: "Latest routine is already completed" });
+            }
+                        
+            // Format the weekly routine object to include the information about the targeted muscle groups
+            // excluding muscle junction info
+            weeklyRoutine.dailyRoutines.forEach(routine => {
+                routine.exerciseDetails.forEach(detail => {
+                    detail.exercise.muscleGroups = detail.exercise.muscleGroups.map(mg => ({
+                        id: mg.id,
+                        description: mg.muscleGroup.description
+                    }));
+                });
+            });
+
+            return res.status(200).json({ status: true, data: weeklyRoutine, message: "Routine retrieved successfully" });
 
         } catch (err) {
             return res.status(500).json({ status: false, error: err });

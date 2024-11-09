@@ -23,10 +23,11 @@ class FitnessUtils {
 
             if (!measurement) throw "Body measurement does not exist";
 
-            const { bodyFatPercent, muscleMass } = measurement;
+            const { bodyFatPercent, muscleMass, weight } = measurement;
             
             if (!bodyFatPercent) throw "Body Fat % is required";
             if (!muscleMass) throw "Lean Body Mass is required";
+            if (!weight) throw "Weight is required";
 
             // Query dob and gender from Profile table
             const decoded = decodeToken(req.headers.authorization);
@@ -38,13 +39,14 @@ class FitnessUtils {
                 },
                 select: {
                     dob: true,
-                    gender: true
+                    gender: true,
+                    height: true
                 }
             });
 
             if (!profile) throw "Profile does not exist";
 
-            const { dob, gender } = profile;
+            const { dob, gender, height } = profile;
 
             if (!dob) throw "Date of Birth is required";
             if (!gender) throw "Gender is required";
@@ -55,11 +57,17 @@ class FitnessUtils {
             // Get classification (Athletes, Fit, Average, etc)
             const classification = FitnessUtils.getClassificationResult(bodyFatPercent, age, gender);
 
+            // Get FFMI
+            const ffmi = FitnessUtils.getFFMI(height, weight, bodyFatPercent);
+
+            // Get FFMI classification
+            const ffmiClassification = FitnessUtils.getFFMIClassification(ffmi, gender);
+
             // Get dynamically fetched body fat chart
             const ranges = FitnessUtils.getClassificationRanges(age, gender);
 
             // Send all data to the Fitness Result Page for display
-            res.status(200).json({ bodyFatPercent, muscleMass, classification, ranges });
+            res.status(200).json({ bodyFatPercent, muscleMass, classification, ffmiClassification, ranges });
         } catch (err) {
             console.error("Error calculating body fat:", err);
             res.status(400).json({ error: err.message });
@@ -168,6 +176,27 @@ class FitnessUtils {
         }
     };
 
+    static getFFMI(height, weight, bodyFatPercent) {
+        const leanBodyMass = FitnessUtils.calculateLeanMuscleMass(weight, bodyFatPercent);
+        const ffmi = leanBodyMass / Math.pow(height / 100, 2);
+        
+        // Adjusted FFMI
+        const adjustedFFMI = ffmi + (6.3 * (1.8 - height / 100));
+
+        return parseFloat(adjustedFFMI.toFixed(1));
+    };
+
+    static getFFMIClassification(ffmi, gender) {
+        const ffmiTable = this.ffmiScoreTable[gender];
+
+        for (const row of ffmiTable) {
+            if (ffmi >= row.ffmi.min && ffmi <= row.ffmi.max) {
+                return row.classification;
+            }
+        }
+        return "Unusual/Extreme Result";
+    };
+
     /**
      * Map age to age group
      * @param {number} age 
@@ -225,6 +254,24 @@ class FitnessUtils {
             { classification: "Poor", M: { min: 28.5, max: Infinity }, F: { min: 35.5, max: Infinity } }
         ]
     };
+
+    // FFMI classification table
+    static ffmiScoreTable = {
+        "M": [
+            { classification: "Skinny", ffmi: { min: 14, max: 18 }},
+            { classification: "Average", ffmi: { min: 18.1, max: 20 }},
+            { classification: "Intermediate Built", ffmi: { min: 20.1, max: 22 }},
+            { classification: "Advanced Built", ffmi: { min: 22.1, max: 24 }},
+            { classification: "Extremely Muscular", ffmi: { min: 24.1, max: 25 }}
+        ],
+        "F": [
+            { classification: "Skinny", ffmi: { min: 10, max: 14 }},
+            { classification: "Average", ffmi: { min: 14.1, max: 16 }},
+            { classification: "Intermediate Built", ffmi: { min: 16.1, max: 18 }},
+            { classification: "Advanced Built", ffmi: { min: 18.1, max: 20 }},
+            { classification: "Extremely Muscular", ffmi: { min: 20.1, max: 22 }}
+        ]
+    };    
 }
 
 module.exports = FitnessUtils;
