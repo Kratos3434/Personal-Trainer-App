@@ -163,6 +163,12 @@ class WeeklyProgress {
             const progress = await prisma.weeklyProgress.findMany({
                 where: {
                     profileId: profile.id
+                },
+                include: {
+                    bodyMeasurement: true
+                },
+                orderBy: {
+                    date: 'asc'
                 }
             });
 
