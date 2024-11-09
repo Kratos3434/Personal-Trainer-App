@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const WeeklyProgress = require('../controller/WeeklyProgress');
+const { WeeklyProgress } = require('../controller/WeeklyProgress');
 
 // Save weekly progress data to db
 router.post('/save', WeeklyProgress.saveWeeklyProgress);

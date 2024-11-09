@@ -242,4 +242,4 @@ class WeeklyProgress {
 }
 
 
-module.exports = WeeklyProgress;
+module.exports = { WeeklyProgress, assessProgress };
