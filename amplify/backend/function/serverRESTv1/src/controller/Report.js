@@ -1,5 +1,6 @@
 const prisma = require('../prismaInstance');
 const FitnessUtils = require("./FitnessUtils");
+const { assessProgress } = require("./WeeklyProgress");
 
 class Report {
 
@@ -41,54 +42,22 @@ class Report {
 
             console.log("----profile----")
             console.log(profile);
-            let prevBodyMeasurement = {}
 
+            let prevBodyMeasurementId
             if (index == 0) { // Using initBodyMeasurment when this is the first progress
-                prevBodyMeasurement = await prisma.bodyMeasurement.findUnique({
-                    where: {
-                        id: profile.bodyMeasurementId
-                    }
-                })
-
+                prevBodyMeasurementId = profile.bodyMeasurementId
             } else {
-                const prevBodyMeasurmentId = allWeeklyProgress[index - 1].bodyMeasurementId
-                prevBodyMeasurement = await prisma.bodyMeasurement.findUnique({
-                    where: {
-                        id: prevBodyMeasurmentId
-                    }
-                })
+                prevBodyMeasurementId = allWeeklyProgress[index - 1].bodyMeasurementId
             }
 
-            console.log("----prevBodyMEasurement----")
-            console.log(prevBodyMeasurement);
+            console.log("------Pass-------")
+            const progress = await assessProgress(currentWeeklyProgress.bodyMeasurementId, prevBodyMeasurementId)
 
             /** Could be made into a function (Temporary Logic) **/
-            let fatDiff = currentBodyMeasurement.bodyFatPercent - prevBodyMeasurement.bodyFatPercent
-            let muscleDiff = currentBodyMeasurement.muscleMass - prevBodyMeasurement.muscleMass
-            let firstString = "";
-            let secondString = "";
-            let thirdString = "";
-
-            if (fatDiff < 0 && muscleDiff > 0) {
-                firstString = "Great!"
-                secondString = "gained" // fat
-                thirdString =  "gained"  // muscle 
-            } else if (fatDiff < 0 && muscleDiff < 0) {
-                firstString = "Good Job!"
-                secondString = "lost" // fat
-                thirdString = "lost"  // muscle  
-            } else if (fatDiff > 0 && muscleDiff > 0) {
-                firstString = "Good Job!"
-                secondString = "gained"   // fat
-                thirdString = "gained"    // muscle 
-            } else {
-                firstString = "Push Harder!"
-                secondString = "lost"  // fat
-                thirdString = "gained" // muscle 
-            }
-
-            const progressSummary = `${firstString} You've ${secondString} ${Math.abs(muscleDiff)}kg of lean muscle and ${thirdString} ${Math.abs(fatDiff)}% of Body Fat compared to last week`
-
+            let fatDiff = progress.gainedFat
+            let muscleDiff = progress.gainedMuscle
+            const progressSummary = progress.assess
+            
             console.log("-----progressSummary")
             console.log(progressSummary);
             /** *** *** *** *** ** ** ** **** **** **/
@@ -99,7 +68,6 @@ class Report {
                 }
             })
             
-
             console.log("----currentWeeklyRoutine----")
             console.log(currentWeeklyRoutine);
 
@@ -112,11 +80,17 @@ class Report {
                 FitnessUtils.getAgeFromDob(profile.dob), //age
                 profile.gender
             )
+            
+            const fatResult = FitnessUtils.getClassificationResult(
+                currentBodyMeasurement.bodyFatPercent,
+                FitnessUtils.getAgeFromDob(profile.dob),
+                profile.gender
+            )
 
             const result = {
                 gainedFat : fatDiff,
                 gainedMuscle : muscleDiff,
-                assess: firstString,
+                assess: progressSummary,
                 fat: currentBodyMeasurement.bodyFatPercent,
                 muscle: currentBodyMeasurement.muscleMass,
                 weight: currentBodyMeasurement.weight,
@@ -126,6 +100,7 @@ class Report {
                 thigh : currentBodyMeasurement.thigh,
                 startDate: currentWeeklyRoutine.startDate,
                 endDate : currentWeeklyRoutine.endDate,
+                fatClassification: fatResult,
                 ffmiClassification : ffmiResult,
                 ranges : ffmiTable
             }
@@ -139,7 +114,7 @@ class Report {
             if (!report) { // Create Report
                 try {
                     console.log('create called');
-                    const createdReport = await prisma.report.create({
+                    report = await prisma.report.create({
                         data: {
                             startDate: result.startDate,  
                             endDate: result.endDate,      
@@ -147,12 +122,13 @@ class Report {
                             weeklyProgressId: progressId    
                         }
                     });
-                    console.log('error?');
-                    console.log(createdReport);
+                    console.log(report);
                 } catch (error) {
                     console.error("Error creating report:", error);
                 }
             }
+
+            result.reportDate = report.created
 
             console.log("-----result-----");
             console.log(result);
