@@ -31,7 +31,7 @@ class CurrentRoutine {
                     profileId: profile.id,
                 },
                 orderBy: {
-                    startDate: "desc",
+                    id: "desc",
                 },
                 include: {
                     dailyRoutines: {
