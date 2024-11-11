@@ -105,7 +105,7 @@ class Report {
                 ranges : ffmiTable
             }
 
-            const report = await prisma.report.findUnique({
+            let report = await prisma.report.findUnique({
                 where: {
                     weeklyProgressId: progressId
                 }
