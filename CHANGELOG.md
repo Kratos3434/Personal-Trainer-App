@@ -16,6 +16,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Removed
 -
 
+## [1.2.0] - 2024-11-11
+
+### Added
+- Recommendation Algorithm (https://github.com/Kratos3434/Personal-Trainer-App/issues/70).
+- Generate Routine Page Modification (https://github.com/Kratos3434/Personal-Trainer-App/issues/71).
+
+### Fixed
+- 
+
+### Changed
+- Edited the logic of routine generation, which is now done by Algorithm.js from the backend instead of generateRoutine.tsx in the backend.
+- Added an indicator to enhance the visual of the Body Fat Chart.
+- Edited the visual of the body fat and body mass comparison on the fitnessResult.tsx.
+- Edited the sorting element of the Current Weekly Routine page from by creation date to by id to make sure it will always display the latest routine.
+
+### Removed
+-
+
 ## [1.1.0] - 2024-10-16
 
 ### Added
