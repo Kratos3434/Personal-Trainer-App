@@ -105,6 +105,82 @@ class Routine {
     };
 
     /**
+     * Method to fetch description of workout environment, type, equipment, and level for the frontend.
+     * @param {*} req 
+     * @param {*} res 
+     * @returns 
+     */
+    static async getExerciseDescByExerciseId(req, res) {
+        let { exerciseId } = req.params;
+
+        try {
+            // Get the exercise details
+            const exercise = await prisma.exercise.findUnique({
+                where: {
+                    id: parseInt(exerciseId)
+                }
+            });
+
+            if (!exercise) throw "No exercise found";
+
+            // Get the environment description
+            const workoutEnv = await prisma.workoutEnvironmentJunction.findMany({
+                where: {
+                    exerciseId: parseInt(exercise.id)
+                },
+                include: {
+                    workoutEnvironment: true,
+                },
+            });
+
+            if (!workoutEnv) throw "No workout environment found";
+
+            // Get the exercise type description
+            const type = await prisma.exerciseType.findUnique({
+                where: {
+                    id: exercise.typeId
+                }
+            });
+
+            if (!type) throw "No type found";
+
+            // Get the equipment description
+            const equipment = await prisma.requiredEquipment.findUnique({
+                where: {
+                    id: exercise.requiredEquipmentId
+                }
+            });
+
+            if (!equipment) throw "No required equipment found"
+
+            // Get the level description
+            const level = await prisma.level.findUnique({
+                where: {
+                    id: exercise.levelId
+                }
+            });
+
+            if (!level) throw "No level info found"
+
+            const result = workoutEnv.map(env => ({
+                workoutEnvId: env.workoutEnvironment.id,
+                envDescription: env.workoutEnvironment.description,
+                typeId: type.id,
+                typeDescription: type.description,
+                equipmentId: equipment.id,
+                equipmentDescription: equipment.description,
+                levelId: level.id,
+                levelDescription: level.description
+            }));
+
+            return res.status(200).json(result);
+        } catch (error) {
+            console.error("Error fetching Workout Environment:", error);
+            return res.status(500).json({ message: "Internal server error", error: error.message });
+        }
+    };
+
+    /**
      * Method to fetch Muscle Groups from the db.
      * @param {Request} req 
      * @param {Response} res 

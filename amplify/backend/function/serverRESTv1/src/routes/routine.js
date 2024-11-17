@@ -10,6 +10,9 @@ router.post("/save", Routine.saveWeeklyRoutine);
 // Get workout environment from db
 router.get("/workoutEnv", Routine.getWorkoutEnv);
 
+// Get Exercise string Description by exerciseId
+router.get("/exerciseDescription/:exerciseId", Routine.getExerciseDescByExerciseId);
+
 // Get equipment status from db
 router.get("/muscleGroup", Routine.getMuscleGroup);
 
