@@ -1,24 +1,41 @@
 require('dotenv').config({path: '../.env'}); 
 const fetch = require('node-fetch');
 const Video = require('./Video');
+const prisma = require('../prismaInstance');
 
-let production = true;
-const endpoint = production ? `https://7u45qve0xl.execute-api.ca-central-1.amazonaws.com/dev`: `http://10.10.6.150:8080`; // Must use aws endpoint to fetch videos
+let production = false;
+const endpoint = production ? `https://7u45qve0xl.execute-api.ca-central-1.amazonaws.com/dev`: `http://10.10.6.150:8080`;
 const adminToken = process.env.ADMIN_PASS;
 
-// Data Entry
+// Data Entry for exercise creation (Including videos)
 // name, typeId, intensity, defaultSets, defaultReps(optional), minutes(optional), levelId, requiredEquipmentId, muscleGroupIds[], workoutEnvironmentIds[]
 const exercisesArray = [
-    //["Walking Barbell Lunge", 1, 3, 3, 12, null, 3, 4, [4], [1,2]],
+    ["Standing Cable Fly Chest", 2, 1, 3, 12, null, 1, 3, [9], [1]],
     ["Kettlebell Walking Lunge", 1, 3, 3, 12, null, 3, 11, [4], [1,2]],
     ["Deep Squat", 1, 3, 3, 10, null, 2, 4, [4], [1,2]],
-    // ["Dumbbell Wrist Curl Forearm", 2, 1, 3, 12, null, 1, 1, [14], [1,2]],
-    // ["Reverse Grip Barbell Curl Forearm", 2, 1, 3, 12, null, 1, 4, [14], [1,2]],
-    //["Dumbbell High Low Carry Forearm", 1, 1, 3, 12, null, 2, 1, [14], [1,2]],
-    // ["Dumbbell Overhead Carry Forearm", 1, 1, 3, 12, null, 2, 1, [14], [1,2]],
+    ["Dumbbell Wrist Curl Forearm", 2, 1, 3, 12, null, 1, 1, [14], [1,2]],
+    ["Reverse Grip Barbell Curl Forearm", 2, 1, 3, 12, null, 1, 4, [14], [1,2]],
+    ["Dumbbell High Low Carry Forearm", 1, 1, 3, 12, null, 2, 1, [14], [1,2]],
+    ["Dumbbell Overhead Carry Forearm", 1, 1, 3, 12, null, 2, 1, [14], [1,2]],
 ];
 
-// Consolidated workflow
+// Data Entry for videos (A separated workflow ONLY for refetching new videos for existing exercises)
+// exerciseName, exerciseId
+const exercisesArrayForVideo = [
+    ["Dumbbell High Low Carry", 321],
+    ["Side Crunch", 322],
+    ["Walking Barbell Lunge", 323],
+    ["Kettlebell Walking Lunge", 328],
+    ["Standing Cable Fly", 330],
+    ["Cable Shrug", 312],
+    ["Snatch Grip High Pull", 313],
+    ["Barbell Wrist Curl", 314],
+    ["Reverse Grip Cable Curl", 315],
+    ["Dumbbell Wrist Curl", 317],
+    ["Reverse Grip Barbell Curl", 318],
+]
+
+// Consolidated workflow for exercise creation
 async function createExerciseAndJunctions() {
     try {
         for (const exerciseData of exercisesArray) {
@@ -123,7 +140,6 @@ async function createMuscleGroupJunctions(exerciseId, muscleGroupIds) {
     }
 };
 
-
 // Method to create muscle group junctions
 async function createEnvironmentJunctions(exerciseId, workoutEnvironmentIds) {
     try {
@@ -169,35 +185,66 @@ async function createEnvironmentJunctions(exerciseId, workoutEnvironmentIds) {
     }
 };
 
-async function fetchIndividualVideo(name, id) {
+// Video refetch workflow
+async function fetchIndividualVideo() {
     try {
-        //Generate the video data
-        const videos = await Video.getVideosFromYoutubeByExerciseName(name);
-        console.log(videos);
+        for (const exerciseForVideo of exercisesArrayForVideo) {
+            const [name, id] = exerciseForVideo;
 
-        //If Youtube reaches its quota, delete the previously created exercises
-        if (!videos) throw "Error fetching videos";        
-
-        videos.map(async (e) => {
-            //Create many videos
-            await prisma.video.create({
-                data: {
-                    url: `https://www.youtube.com/watch?v=${e.id.videoId}`,
-                    title: e.snippet.title,
-                    thumbnail: e.snippet.thumbnails.default.url,
-                    exerciseId: id
+            // Check existing exercise
+            const exercise = await prisma.exercise.findUnique({
+                where: {
+                    id: id
                 }
-            });
-        });
+            })
+
+            if (!exercise) throw "Exercise does not exist";
+
+            const videos = await Video.getVideosFromYoutubeByExerciseName(name, true);
+            console.log(videos);
+
+            for (const e of videos) {
+                const videoUrl = `https://www.youtube.com/watch?v=${e.id.videoId}`;
+
+                // Check duplicated vids
+                const existingVideo = await prisma.video.findFirst({
+                    where: {
+                        url: videoUrl,
+                        exerciseId: id
+                    }
+                });
+
+                if (!existingVideo) {
+                    // Add the video only if it doesn't already exist
+                    await prisma.video.create({
+                        data: {
+                            url: videoUrl,
+                            title: e.snippet.title,
+                            thumbnail: e.snippet.thumbnails.default.url,
+                            exerciseId: id
+                        }
+                    });
+                }
+            }
+            console.log("Videos added to the exercise successfully.");
+            await new Promise(resolve => setTimeout(resolve, 1000)); // Delay
+        }
     } catch (err) {
         console.log(err);
     }
 }
 
-// fetchIndividualVideo("Side Crunch Abs", 322);
 
+// ONLY Execute one workflow at a time, comment out another.
+
+// 1. Exercise Creation Workflow
 createExerciseAndJunctions()
         .then(() => console.log('Exercise setup completed successfully.'))
         .catch(err => console.error('Error during exercise setup:', err.message));
+
+// 2. Video Refetch Workflow
+// fetchIndividualVideo()
+//     .then(() => console.log('Videos added to the exercise successfully.'))
+//     .catch(err => console.error('Error fetching videos:', err.message));
 
 module.exports = createExerciseAndJunctions;
