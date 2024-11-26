@@ -23,7 +23,7 @@ class FitnessUtils {
 
             if (!measurement) throw "Body measurement does not exist";
 
-            const { bodyFatPercent, muscleMass, weight } = measurement;
+            const { bodyFatPercent, muscleMass, weight, date } = measurement;
             
             if (!bodyFatPercent) throw "Body Fat % is required";
             if (!muscleMass) throw "Lean Body Mass is required";
@@ -67,7 +67,7 @@ class FitnessUtils {
             const ranges = FitnessUtils.getClassificationRanges(age, gender);
 
             // Send all data to the Fitness Result Page for display
-            res.status(200).json({ bodyFatPercent, muscleMass, classification, ffmiClassification, ranges });
+            res.status(200).json({ bodyFatPercent, muscleMass, classification, ffmiClassification, ranges, date, weight, ffmiTable: FitnessUtils.ffmiScoreTable[gender] });
         } catch (err) {
             console.error("Error calculating body fat:", err);
             res.status(400).json({ error: err.message });

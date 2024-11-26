@@ -45,7 +45,9 @@ async function assessProgress(currentMeasurementId, prevMeasurementId) {
     return {
         gainedFat: fatDiff,
         gainedMuscle: muscleDiff,
-        assess
+        assess,
+        currentMeasurementId, 
+        prevMeasurementId,
     };
 };
 

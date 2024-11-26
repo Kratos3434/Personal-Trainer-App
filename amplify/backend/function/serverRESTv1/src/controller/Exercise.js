@@ -47,7 +47,7 @@ class Exercise {
             });
 
             //Generate the video data
-            const videos = await Video.getVideosFromYoutubeByExerciseName(newExercise.name);
+            const videos = await Video.getVideosFromYoutubeByExerciseName(newExercise.name, true);
             //console.log(videos);
 
             //If Youtube reaches its quota, delete the previously created exercises
