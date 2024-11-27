@@ -78,7 +78,10 @@ class Algorithm {
             if (age > 50 && intensityId > 1) {
                 intensityId = intensityId - 1;
                 Polling.addLog(`Age over 50, decreasing intensity...\n`);
-            }            
+            } else if (age < 18 && intensityId > 1) {
+                Polling.addLog(`Age under 18, decreasing intensity...\n`);
+                intensityId = intensityId - 1;
+            }
 
             // Logic 2: Set the maximum exercises per day by Intensity
             const maxExercisesPerDay = intensityId === 1 ? 4 : intensityId === 2 ? 5 : intensityId === 3 ? 6 : 7;

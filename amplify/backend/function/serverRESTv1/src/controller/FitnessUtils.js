@@ -67,7 +67,7 @@ class FitnessUtils {
             const ranges = FitnessUtils.getClassificationRanges(age, gender);
 
             // Send all data to the Fitness Result Page for display
-            res.status(200).json({ bodyFatPercent, muscleMass, classification, ffmiClassification, ranges, date, weight, ffmiTable: FitnessUtils.ffmiScoreTable[gender] });
+            res.status(200).json({ bodyFatPercent, muscleMass, classification, ffmiClassification, ranges, date, weight, age, ffmiTable: FitnessUtils.ffmiScoreTable[gender] });
         } catch (err) {
             console.error("Error calculating body fat:", err);
             res.status(400).json({ error: err.message });
@@ -141,10 +141,6 @@ class FitnessUtils {
     static getClassificationResult(bodyFat, age, gender) {
         const ageGroup = FitnessUtils.getAgeGroup(age);
         const chart = FitnessUtils.bodyFatClassification[ageGroup];
-
-        if (age <= 17) {
-            return "Result is based on\nthe min age 18";
-        }
 
         for (const range of chart) {
             if (bodyFat >= range[gender].min && bodyFat <= range[gender].max) {
