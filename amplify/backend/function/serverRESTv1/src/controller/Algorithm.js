@@ -1,5 +1,4 @@
 const prisma = require("../prismaInstance");
-const { decodeToken } = require("./Authorization");
 const FitnessUtils = require("./FitnessUtils");
 const Authorization = require("./Authorization");
 const Routine = require("./Routine");

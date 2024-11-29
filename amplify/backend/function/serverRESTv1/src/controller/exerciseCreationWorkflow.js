@@ -209,6 +209,7 @@ async function createEnvironmentJunctions(exerciseId, workoutEnvironmentIds) {
 }
 
 // Video refetch workflow
+// eslint-disable-next-line no-unused-vars
 async function fetchIndividualVideo() {
   try {
     for (const exerciseForVideo of exercisesArrayForVideo) {
