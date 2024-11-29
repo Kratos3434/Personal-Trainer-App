@@ -11,7 +11,7 @@ async function assessProgress(currentMeasurementId, prevMeasurementId) {
     if (!currentMeasurementId || !prevMeasurementId) throw "IDs for both body measurements are required"
 
     // Retrieve the body measurements for comparison
-    prevBodyMeasurement = await prisma.bodyMeasurement.findUnique({
+    const prevBodyMeasurement = await prisma.bodyMeasurement.findUnique({
         where: {
             id: prevMeasurementId
         }
@@ -19,7 +19,7 @@ async function assessProgress(currentMeasurementId, prevMeasurementId) {
 
     if (!prevBodyMeasurement) throw "Can't find previous body measurements!";
 
-    currentBodyMeasurement = await prisma.bodyMeasurement.findUnique({
+    const currentBodyMeasurement = await prisma.bodyMeasurement.findUnique({
         where: {
             id: currentMeasurementId
         }
