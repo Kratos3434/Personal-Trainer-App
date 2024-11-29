@@ -1,0 +1,12 @@
+# Ignore generated folders
+node_modules/
+prisma/
+
+# Ignore environment variables/keys
+.env
+privateKey.key
+
+# Ignore config files
+.gitignore
+package-lock.json
+event.json
