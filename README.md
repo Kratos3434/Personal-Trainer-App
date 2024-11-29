@@ -63,6 +63,8 @@ Please install the following extensions in your IDE:
 
 ## **Pre-commit Hooks Setup**
 
+**Husky** and **lint-staged** are used together to automatically format and fix linting issues during commits.
+
 - Run `npm install` from the root of the project.
 -  Navigate to the `/amplify/backend/function/serverRESTv1/src` directory and run `npm install` to install the dependencies for that folder.
 -   Install Husky hooks from the root of the project:
