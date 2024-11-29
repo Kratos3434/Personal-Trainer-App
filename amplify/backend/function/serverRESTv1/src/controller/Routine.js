@@ -2,287 +2,300 @@ const prisma = require("../prismaInstance");
 const Authorization = require("./Authorization");
 
 class Routine {
-    /**
-     * Method to save the frontend generated WeeklyRoutine, DailyRoutines, and ExerciseDetails to the db.
-     * @param {Request} req 
-     * @param {Response} res 
-     */
-    static async saveWeeklyRoutine(req, res) {
-        try {
-            let { weeklyRoutine, dailyRoutines } = req.body;
+  /**
+   * Method to save the frontend generated WeeklyRoutine, DailyRoutines, and ExerciseDetails to the db.
+   * @param {Request} req
+   * @param {Response} res
+   */
+  static async saveWeeklyRoutine(req, res) {
+    try {
+      let { weeklyRoutine, dailyRoutines } = req.body;
 
-            if (!weeklyRoutine) throw "Weekly Routine object is required";
-            if (!dailyRoutines) throw "Daily Routine(s) object is required";
+      if (!weeklyRoutine) throw "Weekly Routine object is required";
+      if (!dailyRoutines) throw "Daily Routine(s) object is required";
 
-            const decoded = Authorization.decodeToken(req.headers.authorization);
-            const userId = decoded.id;
+      const decoded = Authorization.decodeToken(req.headers.authorization);
+      const userId = decoded.id;
 
-            // Get the current user's profileId
-            const profile = await prisma.profile.findUnique({
-                where: {
-                    userId: userId
-                },
-                select: {
-                    id: true
-                }
+      // Get the current user's profileId
+      const profile = await prisma.profile.findUnique({
+        where: {
+          userId: userId,
+        },
+        select: {
+          id: true,
+        },
+      });
+
+      if (!profile) throw "Profile does not exist";
+
+      // Start transaction (Objects only save to the db when no errors occur during the entire process)
+      const result = await prisma.$transaction(async (prisma) => {
+        // Save Weekly Routine (Single object)
+        const savedWeeklyRoutine = await prisma.weeklyRoutine.create({
+          data: {
+            startDate: weeklyRoutine.startDate,
+            endDate: weeklyRoutine.endDate,
+            daysPerWeek: weeklyRoutine.daysPerWeek,
+            workoutEnvironmentId: weeklyRoutine.workoutEnvironmentId,
+            profileId: profile.id, // link to profile ID
+          },
+        });
+
+        if (!savedWeeklyRoutine.id) throw "Weekly Routine creation failed";
+
+        // Save Daily Routines (Multiple)
+        for (let dailyRoutine of dailyRoutines) {
+          const savedDailyRoutine = await prisma.dailyRoutine.create({
+            data: {
+              dayNumber: dailyRoutine.dayNumber,
+              weeklyRoutineId: savedWeeklyRoutine.id, // link to weekly routine
+            },
+          });
+
+          if (!savedDailyRoutine.id) throw "Daily Routine creation failed";
+
+          // Save Exercise Details for each daily routine (Multiple)
+          for (let exercise of dailyRoutine.exerciseDetails) {
+            await prisma.exerciseDetails.create({
+              data: {
+                dailyRoutineId: savedDailyRoutine.id, // link to daily routine
+                exerciseId: exercise.exerciseId,
+                sets: exercise.sets,
+                reps: exercise.reps,
+                minutes: exercise.minutes,
+                youtubeURL: exercise.youtubeURL,
+                thumbnailURL: exercise.thumbnailURL,
+              },
             });
-
-            if (!profile) throw "Profile does not exist";
-
-            // Start transaction (Objects only save to the db when no errors occur during the entire process)
-            const result = await prisma.$transaction(async (prisma) => {
-                
-                // Save Weekly Routine (Single object)
-                const savedWeeklyRoutine = await prisma.weeklyRoutine.create({
-                    data: {
-                        startDate: weeklyRoutine.startDate,
-                        endDate: weeklyRoutine.endDate,
-                        daysPerWeek: weeklyRoutine.daysPerWeek,
-                        workoutEnvironmentId: weeklyRoutine.workoutEnvironmentId,
-                        profileId: profile.id // link to profile ID
-                    },
-                });
-
-                if (!savedWeeklyRoutine.id) throw "Weekly Routine creation failed";
-
-                // Save Daily Routines (Multiple)
-                for (let dailyRoutine of dailyRoutines) {
-                    const savedDailyRoutine = await prisma.dailyRoutine.create({
-                        data: {
-                            dayNumber: dailyRoutine.dayNumber,
-                            weeklyRoutineId: savedWeeklyRoutine.id,  // link to weekly routine
-                        },
-                    });
-
-                    if (!savedDailyRoutine.id) throw "Daily Routine creation failed";
-            
-                    // Save Exercise Details for each daily routine (Multiple)
-                    for (let exercise of dailyRoutine.exerciseDetails) {
-                        await prisma.exerciseDetails.create({
-                            data: {
-                                dailyRoutineId: savedDailyRoutine.id,  // link to daily routine
-                                exerciseId: exercise.exerciseId,
-                                sets: exercise.sets,
-                                reps: exercise.reps,
-                                minutes: exercise.minutes,
-                                youtubeURL: exercise.youtubeURL,
-                                thumbnailURL: exercise.thumbnailURL
-                            },
-                        });
-                    }
-                }  
-            });   
-            
-            res.status(200).json({ status: true, data: result, message: "Routine saved successfully" });
-
-        } catch (err) {
-            res.status(400).json({ status: false, error: err });
+          }
         }
-    };
+      });
 
-    /**
-     * Method to fetch workout environment from the db.
-     * @param {Request} req 
-     * @param {Response} res 
-     * @returns workoutEnvironment[]
-     */
-    static async getWorkoutEnv(req, res) {
-        try {
-            const workoutEnv = await prisma.workoutEnvironment.findMany({
-                select: {
-                    id: true,
-                    description: true
-                }
-            });
+      res.status(200).json({ status: true, data: result, message: "Routine saved successfully" });
+    } catch (err) {
+      res.status(400).json({ status: false, error: err });
+    }
+  }
 
-            if (!workoutEnv) throw "No workout environment found";
+  /**
+   * Method to fetch workout environment from the db.
+   * @param {Request} req
+   * @param {Response} res
+   * @returns workoutEnvironment[]
+   */
+  static async getWorkoutEnv(req, res) {
+    try {
+      const workoutEnv = await prisma.workoutEnvironment.findMany({
+        select: {
+          id: true,
+          description: true,
+        },
+      });
 
-            return res.status(200).json(workoutEnv);
-        } catch (error) {
-            console.error("Error fetching Workout Environment:", error);
-            return res.status(500).json({ message: "Internal server error", error: error.message });
-        }
-    };
+      if (!workoutEnv) throw "No workout environment found";
 
-    /**
-     * Method to fetch description of workout environment, type, equipment, and level for the frontend.
-     * @param {*} req 
-     * @param {*} res 
-     * @returns 
-     */
-    static async getExerciseDescByExerciseId(req, res) {
-        let { exerciseId } = req.params;
+      return res.status(200).json(workoutEnv);
+    } catch (error) {
+      console.error("Error fetching Workout Environment:", error);
+      return res.status(500).json({ message: "Internal server error", error: error.message });
+    }
+  }
 
-        try {
-            // Get the exercise details
-            const exercise = await prisma.exercise.findUnique({
-                where: {
-                    id: parseInt(exerciseId)
-                }
-            });
+  /**
+   * Method to fetch description of workout environment, type, equipment, and level for the frontend.
+   * @param {*} req
+   * @param {*} res
+   * @returns
+   */
+  static async getExerciseDescByExerciseId(req, res) {
+    let { exerciseId } = req.params;
 
-            if (!exercise) throw "No exercise found";
+    try {
+      // Get the exercise details
+      const exercise = await prisma.exercise.findUnique({
+        where: {
+          id: parseInt(exerciseId),
+        },
+      });
 
-            // Get the environment description
-            const workoutEnv = await prisma.workoutEnvironmentJunction.findMany({
-                where: {
-                    exerciseId: parseInt(exercise.id)
-                },
-                include: {
-                    workoutEnvironment: true,
-                },
-            });
+      if (!exercise) throw "No exercise found";
 
-            if (!workoutEnv) throw "No workout environment found";
+      // Get the environment description
+      const workoutEnv = await prisma.workoutEnvironmentJunction.findMany({
+        where: {
+          exerciseId: parseInt(exercise.id),
+        },
+        include: {
+          workoutEnvironment: true,
+        },
+      });
 
-            // Get the exercise type description
-            const type = await prisma.exerciseType.findUnique({
-                where: {
-                    id: exercise.typeId
-                }
-            });
+      if (!workoutEnv) throw "No workout environment found";
 
-            if (!type) throw "No type found";
+      // Get the exercise type description
+      const type = await prisma.exerciseType.findUnique({
+        where: {
+          id: exercise.typeId,
+        },
+      });
 
-            // Get the equipment description
-            const equipment = await prisma.requiredEquipment.findUnique({
-                where: {
-                    id: exercise.requiredEquipmentId
-                }
-            });
+      if (!type) throw "No type found";
 
-            if (!equipment) throw "No required equipment found"
+      // Get the equipment description
+      const equipment = await prisma.requiredEquipment.findUnique({
+        where: {
+          id: exercise.requiredEquipmentId,
+        },
+      });
 
-            // Get the level description
-            const level = await prisma.level.findUnique({
-                where: {
-                    id: exercise.levelId
-                }
-            });
+      if (!equipment) throw "No required equipment found";
 
-            if (!level) throw "No level info found"
+      // Get the level description
+      const level = await prisma.level.findUnique({
+        where: {
+          id: exercise.levelId,
+        },
+      });
 
-            const result = workoutEnv.map(env => ({
-                workoutEnvId: env.workoutEnvironment.id,
-                envDescription: env.workoutEnvironment.description,
-                typeId: type.id,
-                typeDescription: type.description,
-                equipmentId: equipment.id,
-                equipmentDescription: equipment.description,
-                levelId: level.id,
-                levelDescription: level.description
-            }));
+      if (!level) throw "No level info found";
 
-            return res.status(200).json(result);
-        } catch (error) {
-            console.error("Error fetching Workout Environment:", error);
-            return res.status(500).json({ message: "Internal server error", error: error.message });
-        }
-    };
+      const result = workoutEnv.map((env) => ({
+        workoutEnvId: env.workoutEnvironment.id,
+        envDescription: env.workoutEnvironment.description,
+        typeId: type.id,
+        typeDescription: type.description,
+        equipmentId: equipment.id,
+        equipmentDescription: equipment.description,
+        levelId: level.id,
+        levelDescription: level.description,
+      }));
 
-    /**
-     * Method to fetch Muscle Groups from the db.
-     * @param {Request} req 
-     * @param {Response} res 
-     * @returns muscleGroup[]
-     */
-    static async getMuscleGroup(req, res) {
-        try {
-            const muscleGroup = await prisma.muscleGroup.findMany({
-                select: {
-                    id: true,
-                    description: true
-                }
-            });
+      return res.status(200).json(result);
+    } catch (error) {
+      console.error("Error fetching Workout Environment:", error);
+      return res.status(500).json({ message: "Internal server error", error: error.message });
+    }
+  }
 
-            if (!muscleGroup) throw "No muscle group found";
+  /**
+   * Method to fetch Muscle Groups from the db.
+   * @param {Request} req
+   * @param {Response} res
+   * @returns muscleGroup[]
+   */
+  static async getMuscleGroup(req, res) {
+    try {
+      const muscleGroup = await prisma.muscleGroup.findMany({
+        select: {
+          id: true,
+          description: true,
+        },
+      });
 
-            return res.status(200).json(muscleGroup);
-        } catch (error) {
-            console.error("Error fetching Muscle Group:", error);
-            return res.status(500).json({ message: "Internal server error", error: error.message });
-        }
-    };
+      if (!muscleGroup) throw "No muscle group found";
 
-    /**
-     * Method to fetch exercises with custom params from db. All params are optional. 
-     * @param {Request} req 
-     * @param {Response} res 
-     * @returns exercise[]
-     */
-    static async getExercises(req, res) {
-        // Accept both http req or object
-        const isHttpRequest = req && req.query !== undefined;        
+      return res.status(200).json(muscleGroup);
+    } catch (error) {
+      console.error("Error fetching Muscle Group:", error);
+      return res.status(500).json({ message: "Internal server error", error: error.message });
+    }
+  }
 
-        try {    
-            const { name, typeId, minIntensity, maxIntensity, levelId, requiredEquipmentId, workoutEnvironmentId, muscleGroups } = isHttpRequest ? req.query : req;
+  /**
+   * Method to fetch exercises with custom params from db. All params are optional.
+   * @param {Request} req
+   * @param {Response} res
+   * @returns exercise[]
+   */
+  static async getExercises(req, res) {
+    // Accept both http req or object
+    const isHttpRequest = req && req.query !== undefined;
 
-            // Build query object
-            const queryConditions = {};
+    try {
+      const {
+        name,
+        typeId,
+        minIntensity,
+        maxIntensity,
+        levelId,
+        requiredEquipmentId,
+        workoutEnvironmentId,
+        muscleGroups,
+      } = isHttpRequest ? req.query : req;
 
-            if (name) {
-                queryConditions.name = {
-                    contains: name,
-                    mode: 'insensitive', // Case-insensitive search
-                };
-            }
-            if (typeId) {
-                queryConditions.typeId = Number(typeId);
-            }
-            if (minIntensity) {
-                queryConditions.intensity = {
-                    gte: Number(minIntensity), 
-                };
-            }
-            if (maxIntensity) {
-                queryConditions.intensity = {
-                    lte: Number(maxIntensity),
-                };
-            }
-            if (levelId) {
-                queryConditions.levelId = Number(levelId);
-            }
-            if (requiredEquipmentId) {
-                queryConditions.requiredEquipmentId = Number(requiredEquipmentId);
-            }
-            // Search exercises with multiple workoutEnvironments
-            if (workoutEnvironmentId) {
-                const workoutEnvArray = Array.isArray(workoutEnvironmentId) ? workoutEnvironmentId.map(Number) : [Number(workoutEnvironmentId)];
-                queryConditions.workoutEnvironments = {
-                    some: {
-                        workoutEnvironmentId: {
-                            in: workoutEnvArray,
-                        },
-                    },
-                };
-            }
-            // Search exercises with multiple muscleGroups
-            if (muscleGroups) {
-                const muscleGroupArray = typeof muscleGroups === 'string'
-                    ? muscleGroups.split(',').map(Number)
-                    : [Number(muscleGroups)];
+      // Build query object
+      const queryConditions = {};
 
-                queryConditions.muscleGroups = {
-                    some: { muscleGroupId: { in: muscleGroupArray } },
-                };
-            }
+      if (name) {
+        queryConditions.name = {
+          contains: name,
+          mode: "insensitive", // Case-insensitive search
+        };
+      }
+      if (typeId) {
+        queryConditions.typeId = Number(typeId);
+      }
+      if (minIntensity) {
+        queryConditions.intensity = {
+          gte: Number(minIntensity),
+        };
+      }
+      if (maxIntensity) {
+        queryConditions.intensity = {
+          lte: Number(maxIntensity),
+        };
+      }
+      if (levelId) {
+        queryConditions.levelId = Number(levelId);
+      }
+      if (requiredEquipmentId) {
+        queryConditions.requiredEquipmentId = Number(requiredEquipmentId);
+      }
+      // Search exercises with multiple workoutEnvironments
+      if (workoutEnvironmentId) {
+        const workoutEnvArray = Array.isArray(workoutEnvironmentId)
+          ? workoutEnvironmentId.map(Number)
+          : [Number(workoutEnvironmentId)];
+        queryConditions.workoutEnvironments = {
+          some: {
+            workoutEnvironmentId: {
+              in: workoutEnvArray,
+            },
+          },
+        };
+      }
+      // Search exercises with multiple muscleGroups
+      if (muscleGroups) {
+        const muscleGroupArray =
+          typeof muscleGroups === "string"
+            ? muscleGroups.split(",").map(Number)
+            : [Number(muscleGroups)];
 
-            // Fetch exercises with the constructed query
-            const exercises = await prisma.exercise.findMany({
-                where: queryConditions,
-                include: {
-                    muscleGroups: true,
-                },
-            });
+        queryConditions.muscleGroups = {
+          some: { muscleGroupId: { in: muscleGroupArray } },
+        };
+      }
 
-            if (!exercises.length) throw `No exercises found matching the criteria: ${isHttpRequest ? JSON.stringify(req.query) : JSON.stringify(req)}`;
+      // Fetch exercises with the constructed query
+      const exercises = await prisma.exercise.findMany({
+        where: queryConditions,
+        include: {
+          muscleGroups: true,
+        },
+      });
 
-            return isHttpRequest ? res.status(200).json(exercises) : exercises;
-        } catch (error) {
-            console.error(`\n${error}`);
-            return isHttpRequest ? res.status(500).json({ message: "Internal server error", error: error.message }) : { message: "Internal server error", error: error.message };
-        }
-    };
+      if (!exercises.length)
+        throw `No exercises found matching the criteria: ${isHttpRequest ? JSON.stringify(req.query) : JSON.stringify(req)}`;
+
+      return isHttpRequest ? res.status(200).json(exercises) : exercises;
+    } catch (error) {
+      console.error(`\n${error}`);
+      return isHttpRequest
+        ? res.status(500).json({ message: "Internal server error", error: error.message })
+        : { message: "Internal server error", error: error.message };
+    }
+  }
 }
 
 module.exports = Routine;

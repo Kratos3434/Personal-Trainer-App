@@ -1,7 +1,7 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const Exercise = require('../controller/Exercise');
-const Authorization = require('../controller/Authorization');
+const Exercise = require("../controller/Exercise");
+const Authorization = require("../controller/Authorization");
 
 router.post("/create", Authorization.verifyAdmin, Exercise.create);
 
