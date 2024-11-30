@@ -1,8 +1,8 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const Routine = require('../controller/Routine');
-const DailyRoutine = require('../controller/DailyRoutine');
-const Algorithm = require('../controller/Algorithm');
+const Routine = require("../controller/Routine");
+const DailyRoutine = require("../controller/DailyRoutine");
+const Algorithm = require("../controller/Algorithm");
 
 // Save Weekly Routine to db
 router.post("/save", Routine.saveWeeklyRoutine);

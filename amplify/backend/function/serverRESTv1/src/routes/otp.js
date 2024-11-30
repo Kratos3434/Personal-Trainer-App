@@ -1,6 +1,6 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const Otp = require('../controller/Otp');
+const Otp = require("../controller/Otp");
 
 router.get("/send/:email", Otp.send);
 

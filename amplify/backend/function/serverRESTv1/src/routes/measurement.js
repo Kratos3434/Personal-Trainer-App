@@ -1,8 +1,8 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const BodyMeasurement = require('../controller/BodyMeasurement');
-const Authorization = require('../controller/Authorization');
-const FitnessUtils = require('../controller/FitnessUtils');
+const BodyMeasurement = require("../controller/BodyMeasurement");
+const Authorization = require("../controller/Authorization");
+const FitnessUtils = require("../controller/FitnessUtils");
 
 // Save body measurement data to db
 router.post("/save", BodyMeasurement.saveBodyMeasurement);

@@ -9,15 +9,8 @@ class BodyMeasurement {
    * @param {Response} res
    */
   static async saveBodyMeasurement(req, res) {
-    let {
-      weight,
-      chest,
-      abdomen,
-      thigh,
-      bypassMeasurementFlag,
-      bodyFatPercent,
-      muscleMass,
-    } = req.body;
+    let { weight, chest, abdomen, thigh, bypassMeasurementFlag, bodyFatPercent, muscleMass } =
+      req.body;
 
     try {
       const decoded = Authorization.decodeToken(req.headers.authorization);
@@ -26,14 +19,14 @@ class BodyMeasurement {
       // Get required data for calculation
       const profile = await prisma.profile.findUnique({
         where: {
-          userId: userId
+          userId: userId,
         },
         select: {
           id: true,
           dob: true,
           gender: true,
-          bodyMeasurementId: true
-        }
+          bodyMeasurementId: true,
+        },
       });
 
       if (!profile) throw "Profile does not exist";
@@ -63,8 +56,8 @@ class BodyMeasurement {
           thigh,
           bypassMeasurementFlag,
           bodyFatPercent,
-          muscleMass
-        }
+          muscleMass,
+        },
       });
 
       // If no initial body measurement Id is linked to profile, link the current one to it
@@ -74,7 +67,7 @@ class BodyMeasurement {
           data: { bodyMeasurementId: bodyMeasurement.id },
         });
       }
-      
+
       res.status(200).json({
         status: true,
         data: bodyMeasurement,

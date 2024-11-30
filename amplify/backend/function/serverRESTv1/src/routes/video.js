@@ -1,6 +1,6 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const Video = require('../controller/Video');
+const Video = require("../controller/Video");
 
 router.get("/random/:exerciseId", Video.getByExerciseIdRandom);
 
