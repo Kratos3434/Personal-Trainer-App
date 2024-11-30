@@ -162,7 +162,7 @@ class Report {
         prevFfmiClassification: prevFfmiResult,
         ranges: ffmiTable,
         reportDate: currentWeeklyProgress.date,
-        lastReportDate: prevBodyMeasurement.date,
+        lastReportDate: prevWeeklyProgress? prevWeeklyProgress.date : prevBodyMeasurement.date,
         progress: prevProgress,
       };
 
