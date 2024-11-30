@@ -1,145 +1,205 @@
-const prisma = require('../prismaInstance');
+const prisma = require("../prismaInstance");
 const FitnessUtils = require("./FitnessUtils");
-const { assessProgress } = require("./WeeklyProgress");
+//const { assessProgress } = require("./WeeklyProgress");
+const Authorization = require("./Authorization");
 
 class Report {
+  static async getReport(req, res) {
+    try {
+      const { id } = req.params;
+      const progressId = Number(id);
+      const prevId = req.query.prevId;
+      console.log(req.headers);
 
-    static async getReport (req, res) {
-        try { 
-            const { id } = req.params
-            const progressId = Number(id);
+      const decoded = Authorization.decodeToken(req.headers.authorization);
+      const userId = decoded.id;
 
-            const allWeeklyProgress = await prisma.weeklyProgress.findMany({
-                orderBy: {
-                  date: 'asc' // Change to 'desc' for descending order (newest first)
-                }
-              });
+      // Get the current user's profileId
+      const profile = await prisma.profile.findUnique({
+        where: {
+          userId: userId,
+        },
+      });
 
-            console.log(allWeeklyProgress);
+      console.log("-------profile-------");
+      console.log(profile);
 
-            const index = allWeeklyProgress.findIndex(progress => progress.id == progressId);
+      const allWeeklyProgress = await prisma.weeklyProgress.findMany({
+        where: {
+          profileId: profile.id,
+        },
+        include: {
+          bodyMeasurement: true,
+        },
+        orderBy: {
+          date: "asc",
+        },
+      });
 
-            const currentWeeklyProgress = allWeeklyProgress[index]
+      console.log(allWeeklyProgress);
 
-            console.log("----currentWeeklyProgress---")
-            console.log(currentWeeklyProgress);
-           
-            const currentBodyMeasurement = await prisma.bodyMeasurement.findUnique({
-                where: {
-                    id:  currentWeeklyProgress.bodyMeasurementId
-                }
-            })
+      const index = allWeeklyProgress.findIndex((progress) => progress.id == progressId);
 
-            console.log("----currentBodyMEasurement----")
-            console.log(currentBodyMeasurement);
+      const currentWeeklyProgress = allWeeklyProgress[index];
+      const prevWeeklyProgress = allWeeklyProgress.find((progress) => progress.id == prevId);
 
-            const profileId = allWeeklyProgress[index].profileId
-            const profile = await prisma.profile.findUnique({
-                    where: {
-                        id: profileId
-                    }
-                })
+      const allPrevProgress = allWeeklyProgress.slice(0, index); // to send for dropdown box
+      let prevProgress = [];
+      allPrevProgress.forEach((p) => {
+        const item = { id: p.id, date: p.date };
+        prevProgress.push(item);
+      });
 
-            console.log("----profile----")
-            console.log(profile);
+      console.log("----WeeklyProgress---");
+      console.log(currentWeeklyProgress);
+      console.log(prevWeeklyProgress);
 
-            let prevBodyMeasurementId
-            if (index == 0) { // Using initBodyMeasurment when this is the first progress
-                prevBodyMeasurementId = profile.bodyMeasurementId
-            } else {
-                prevBodyMeasurementId = allWeeklyProgress[index - 1].bodyMeasurementId
-            }
+      const currentBodyMeasurement = currentWeeklyProgress.bodyMeasurement;
 
-            console.log("------Pass-------")
-            const progress = await assessProgress(currentWeeklyProgress.bodyMeasurementId, prevBodyMeasurementId)
+      console.log("----currentBodyMEasurement----");
+      console.log(currentBodyMeasurement);
 
-            /** Could be made into a function (Temporary Logic) **/
-            let fatDiff = progress.gainedFat
-            let muscleDiff = progress.gainedMuscle
-            const progressSummary = progress.assess
-            
-            console.log("-----progressSummary")
-            console.log(progressSummary);
-            /** *** *** *** *** ** ** ** **** **** **/
+      let prevBodyMeasurement;
+      if (index == 0) {
+        // Using initBodyMeasurment when this is the first progress
+        prevBodyMeasurement = await prisma.bodyMeasurement.findUnique({
+          where: {
+            id: profile.bodyMeasurementId,
+          },
+        });
+      } else if (!prevWeeklyProgress) {
+        prevBodyMeasurement = allWeeklyProgress[index - 1].bodyMeasurement;
+      } else {
+        prevBodyMeasurement = prevWeeklyProgress.bodyMeasurement;
+      }
 
-            const currentWeeklyRoutine = await prisma.weeklyRoutine.findUnique({
-                where : {
-                    id : currentWeeklyProgress.weeklyRoutineId
-                }
-            })
-            
-            console.log("----currentWeeklyRoutine----")
-            console.log(currentWeeklyRoutine);
+      console.log("------Pass-------");
 
-            const ffmiResult = FitnessUtils.getFFMIClassification(
-                FitnessUtils.getFFMI(profile.height, currentBodyMeasurement.weight, currentBodyMeasurement.bodyFatPercent),
-                profile.gender
-            )
+      let fatDiff = currentBodyMeasurement.bodyFatPercent - prevBodyMeasurement.bodyFatPercent;
+      let muscleDiff = currentBodyMeasurement.muscleMass - prevBodyMeasurement.muscleMass;
 
-            const ffmiTable = FitnessUtils.getClassificationRanges(
-                FitnessUtils.getAgeFromDob(profile.dob), //age
-                profile.gender
-            )
-            
-            const fatResult = FitnessUtils.getClassificationResult(
-                currentBodyMeasurement.bodyFatPercent,
-                FitnessUtils.getAgeFromDob(profile.dob),
-                profile.gender
-            )
+      // Assess the progress
+      let assess = "";
 
-            const result = {
-                gainedFat : fatDiff,
-                gainedMuscle : muscleDiff,
-                assess: progressSummary,
-                fat: currentBodyMeasurement.bodyFatPercent,
-                muscle: currentBodyMeasurement.muscleMass,
-                weight: currentBodyMeasurement.weight,
-                height: profile.height,
-                chest : currentBodyMeasurement.chest,
-                abdomen : currentBodyMeasurement.abdomen,
-                thigh : currentBodyMeasurement.thigh,
-                startDate: currentWeeklyRoutine.startDate,
-                endDate : currentWeeklyRoutine.endDate,
-                fatClassification: fatResult,
-                ffmiClassification : ffmiResult,
-                ranges : ffmiTable
-            }
+      if (fatDiff < 0 && muscleDiff > 0) {
+        assess = "Great!";
+      } else if ((fatDiff < 0 && muscleDiff < 0) || (fatDiff > 0 && muscleDiff > 0)) {
+        assess = "Good Job!";
+      } else {
+        assess = "Push Harder!";
+      }
 
-            let report = await prisma.report.findUnique({
-                where: {
-                    weeklyProgressId: progressId
-                }
-            })
-    
-            if (!report) { // Create Report
-                try {
-                    console.log('create called');
-                    report = await prisma.report.create({
-                        data: {
-                            startDate: result.startDate,  
-                            endDate: result.endDate,      
-                            progressSummary: progressSummary, 
-                            weeklyProgressId: progressId    
-                        }
-                    });
-                    console.log(report);
-                } catch (error) {
-                    console.error("Error creating report:", error);
-                }
-            }
+      console.log("-----progress assess");
+      console.log(assess);
+      /** *** *** *** *** ** ** ** **** **** **/
 
-            result.reportDate = report.created
+      const ffmiResult = FitnessUtils.getFFMIClassification(
+        FitnessUtils.getFFMI(
+          profile.height,
+          currentBodyMeasurement.weight,
+          currentBodyMeasurement.bodyFatPercent,
+        ),
+        profile.gender,
+      );
 
-            console.log("-----result-----");
-            console.log(result);
+      const fatResult = FitnessUtils.getClassificationResult(
+        currentBodyMeasurement.bodyFatPercent,
+        FitnessUtils.getAgeFromDob(profile.dob),
+        profile.gender,
+      );
 
-            res.status(200).json(result);
+      const prevFfmiResult = FitnessUtils.getFFMIClassification(
+        FitnessUtils.getFFMI(
+          profile.height,
+          prevBodyMeasurement.weight,
+          prevBodyMeasurement.bodyFatPercent,
+        ),
+        profile.gender,
+      );
+
+      const prevFatResult = FitnessUtils.getClassificationResult(
+        prevBodyMeasurement.bodyFatPercent,
+        FitnessUtils.getAgeFromDob(profile.dob),
+        profile.gender,
+      );
+
+      const ffmiTable = FitnessUtils.getClassificationRanges(
+        FitnessUtils.getAgeFromDob(profile.dob), //age
+        profile.gender,
+      );
+
+      const currentWeeklyRoutine = await prisma.weeklyRoutine.findUnique({
+        where: {
+          id: currentWeeklyProgress.weeklyRoutineId,
+        },
+      });
+
+      console.log("----currentWeeklyRoutine----");
+      console.log(currentWeeklyRoutine);
+
+      const result = {
+        gainedFat: fatDiff,
+        gainedMuscle: muscleDiff,
+        assess: assess,
+        fat: currentBodyMeasurement.bodyFatPercent,
+        muscle: currentBodyMeasurement.muscleMass,
+        weight: currentBodyMeasurement.weight,
+        height: profile.height,
+        chest: currentBodyMeasurement.chest,
+        abdomen: currentBodyMeasurement.abdomen,
+        thigh: currentBodyMeasurement.thigh,
+        startDate: currentWeeklyRoutine.startDate,
+        endDate: currentWeeklyRoutine.endDate,
+        fatClassification: fatResult,
+        ffmiClassification: ffmiResult,
+        prevFat: prevBodyMeasurement.bodyFatPercent,
+        prevMuscle: prevBodyMeasurement.muscleMass,
+        prevWeight: prevBodyMeasurement.weight,
+        prevChest: prevBodyMeasurement.chest,
+        prevAbdomen: prevBodyMeasurement.abdomen,
+        prevThigh: prevBodyMeasurement.thigh,
+        prevFatClassification: prevFatResult,
+        prevFfmiClassification: prevFfmiResult,
+        ranges: ffmiTable,
+        reportDate: currentWeeklyProgress.date,
+        lastReportDate: prevWeeklyProgress? prevWeeklyProgress.date : prevBodyMeasurement.date,
+        progress: prevProgress,
+      };
+
+      let report = await prisma.report.findUnique({
+        where: {
+          weeklyProgressId: progressId,
+        },
+      });
+
+      if (!report) {
+        // Create Report
+        try {
+          console.log("create called");
+          report = await prisma.report.create({
+            data: {
+              startDate: result.startDate,
+              endDate: result.endDate,
+              progressSummary: progressSummary,
+              weeklyProgressId: progressId,
+            },
+          });
+          console.log(report);
+        } catch (error) {
+          console.error("Error creating report:", error);
         }
-        catch (err) {
-            console.log(err);
-            res.status(400).json({status: false, error: err});
-        }
+      }
+
+      console.log("-----result-----");
+      console.log(result);
+      console.log(result.progress);
+
+      res.status(200).json(result);
+    } catch (err) {
+      console.log(err);
+      res.status(400).json({ status: false, error: err });
     }
+  }
 }
 
 module.exports = Report;

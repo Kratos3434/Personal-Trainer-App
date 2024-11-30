@@ -35,3 +35,40 @@ Once you are ready to push/publish your code do these steps to avoid any merge c
   status: false,
   error: "error message",
 }
+
+# Formatting and Linting
+
+## **Recommended IDE Extensions**
+
+Please install the following extensions in your IDE:
+- **ESLint**
+- **Prettier**
+
+## **Formatting and Linting Commands**
+
+- **Format Code**:
+  ```sh
+  npm run prettier
+  ```
+
+- **Run Linter**:
+  ```sh
+  npm run lint
+  ```
+
+- **Run Linter with Autofix**
+  ```sh
+  npm run lint:fix
+  ```
+
+## **Pre-commit Hooks Setup**
+
+**Husky** and **lint-staged** are used together to automatically format and fix linting issues during commits.
+
+- Run `npm install` from the root of the project.
+-  Navigate to the `/amplify/backend/function/serverRESTv1/src` directory and run `npm install` to install the dependencies for that folder.
+-   Install Husky hooks from the root of the project:
+    ```sh
+    npx husky init
+    ```
+

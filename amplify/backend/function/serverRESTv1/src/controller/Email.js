@@ -1,26 +1,26 @@
-const nodemailer = require('nodemailer');
+const nodemailer = require("nodemailer");
 
 class Email {
-    static transporter = nodemailer.createTransport({
-        service: 'gmail',
-        //name: 'PTA',
-        auth: {
-            user: 'keithcarlos34@gmail.com',
-            pass: process.env.MAIL_PASS
-        }
-    });
+  static transporter = nodemailer.createTransport({
+    service: "gmail",
+    //name: 'PTA',
+    auth: {
+      user: "keithcarlos34@gmail.com",
+      pass: process.env.MAIL_PASS,
+    },
+  });
 
-    /**
-     * 
-     * @param {string} to 
-     * @param {string} otp 
-     */
-    static async sendOtp(to, otp) {
-        const mailOptions = {
-            from: 'keithcarlos34@gmail.com',
-            to,
-            subject: "Verify email",
-            html: `
+  /**
+   *
+   * @param {string} to
+   * @param {string} otp
+   */
+  static async sendOtp(to, otp) {
+    const mailOptions = {
+      from: "keithcarlos34@gmail.com",
+      to,
+      subject: "Verify email",
+      html: `
             <p>Dear ${to}</p>,
             <div></div>
             <div>
@@ -30,23 +30,23 @@ class Email {
                 <p>Thank you,</p>
                 <p>Personal Trainer App Team</p>
             </div>
-         `
-        }
+         `,
+    };
 
-        await Email.transporter.sendMail(mailOptions);
-    }
+    await Email.transporter.sendMail(mailOptions);
+  }
 
-    /**
-     * 
-     * @param {string} to 
-     * @param {string} otp 
-     */
-    static async sendForgotOtp(to, otp) {
-        const mailOptions = {
-            from: 'keithcarlos34@gmail.com',
-            to,
-            subject: "Verify email",
-            html: `
+  /**
+   *
+   * @param {string} to
+   * @param {string} otp
+   */
+  static async sendForgotOtp(to, otp) {
+    const mailOptions = {
+      from: "keithcarlos34@gmail.com",
+      to,
+      subject: "Verify email",
+      html: `
             <p>Dear ${to}</p>,
             <div></div>
             <div>
@@ -56,12 +56,11 @@ class Email {
                 <p>Thank you,</p>
                 <p>Personal Trainer App Team</p>
             </div>
-         `
-        }
+         `,
+    };
 
-        await Email.transporter.sendMail(mailOptions);
-
-    }
+    await Email.transporter.sendMail(mailOptions);
+  }
 }
 
 module.exports = Email;

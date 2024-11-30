@@ -6,6 +6,8 @@ const jwt = require('jsonwebtoken');
 const randomString = require('randomstring');
 const Email = require('./Email');
 const Otp = require('./Otp');
+const Authorization = require('./Authorization');
+const stripe = require('stripe')(process.env.STRIPE_TEST_SECRET_KEY);
 
 class User {
     /**
@@ -40,7 +42,8 @@ class User {
                 include: {
                     userAccount: {
                         select: {
-                            email: true
+                            email: true,
+                            stripeId: true
                         }
                     }
                 }
@@ -335,6 +338,244 @@ class User {
         } catch (err) {
             res.status(400).json({status: false, error: err});
         }   
+    }
+
+    /**
+     * 
+     * @param {Request} req 
+     * @param {Response} res 
+     */
+    static async createPaymentMethodWithSubscription(req, res) {
+        const { paymentMethodId } = req.body;
+        try {
+            const decoded = Authorization.decodeToken(req.headers.authorization);
+            const email = decoded.email;
+            const id = decoded.id;
+
+            if (!email) throw "Email is missing from token";
+            if (!paymentMethodId) throw "Payment method id is required";
+
+            const profile = await prisma.profile.findUnique({
+                where: {
+                    userId: +id
+                }
+            });
+
+            if (!profile) throw "Cannot find profile with the token";
+
+            const newCustomer = await stripe.customers.create({
+                name: `${profile.firstName} ${profile.lastName}`,
+                email: email,
+                payment_method: paymentMethodId,
+                invoice_settings: {
+                    default_payment_method: paymentMethodId
+                }
+            });
+
+            const subscription = await stripe.subscriptions.create({
+                customer: newCustomer.id,
+                items: [
+                    {
+                        price: 'price_1QN47qALN5ZJppZ0kdzc8AtO'
+                    }
+                ],
+                //expand: ['latest_invoice.payment_intent']
+            });
+
+            //add the stripe id into the user account
+            await prisma.userAccount.update({
+                where: {
+                    id: profile.userId
+                },
+                data: {
+                    stripeId: newCustomer.id
+                }
+            })
+
+            res.status(200).json({
+                status: true,
+                message: "Creating new customer and subscription successful",
+                data: {
+                    subscription,
+                }
+            })
+        } catch (err) {
+            console.log(err);
+            res.status(400).json({status: false, error: "Something went wrong while processing payment"});
+        }
+    }
+
+    /**
+     * 
+     * @param {Request} req 
+     * @param {Response} res 
+     */
+    static async isSubscriptionActive(req, res) {
+        try {
+            const decoded = Authorization.decodeToken(req.headers.authorization);
+            const email = decoded.email;
+
+            if (!email) throw "Email is not present in the token";
+
+            const user = await prisma.userAccount.findUnique({
+                where: {
+                    email
+                }
+            });
+
+            if (!user) throw "User does not exist";
+
+            const subscriptions = await stripe.subscriptions.list({
+               customer: user.stripeId
+            });
+
+            if (subscriptions.data.length === 0) throw "No active subscriptions for this user";
+
+            const subId = subscriptions.data[0].id;
+
+            //Get the subscription status
+            const subscription = await stripe.subscriptions.retrieve(subId);
+
+            if (!subscription) throw "Subscription does not exist";
+            let isActive = false;
+
+            if (subscription.status === 'active') {
+                isActive = true;
+            } else if (subscription.status === 'trialing') {
+                isActive = true;
+            } else if (subscription.status === 'canceled') {
+                if (subscription.cancel_at_period_end) {
+                    isActive = true;
+                } else {
+                    isActive = false;
+                }
+            }
+
+            res.status(200).json({status: true, data: {isActive}});
+
+        } catch (err) {
+            res.status(400).json({status: false, error: err});
+        }
+    }
+
+    /**
+     * 
+     * @param {Request} req 
+     * @param {Response} res 
+     */
+    static async cancelSubscription(req, res) {
+        try {
+            const decoded = Authorization.decodeToken(req.headers.authorization);
+            const email = decoded.email;
+
+            if (!email) throw "Email is not present in the token";
+
+            const user = await prisma.userAccount.findUnique({
+                where: {
+                    email
+                }
+            });
+
+            if (!user) throw "User does not exist";
+
+            const subscriptions = await stripe.subscriptions.list({
+               customer: user.stripeId,
+               status: 'active'
+            });
+
+            if (subscriptions.data.length === 0) throw "No active subscriptions for this user";
+
+            const subId = subscriptions.data[0].id;
+
+            const cancelSub = await stripe.subscriptions.update(subId, {
+                cancel_at_period_end: true
+            });
+
+            if (!cancelSub) throw "Something went wrong while cancelling subscription";
+
+            const endDate = new Date(cancelSub.current_period_end * 1000);
+
+            res.status(200).json({status: true, messsage: "Subscription successfully canceled", data: {endDate}})
+        } catch (err) {
+            res.status(400).json({status: false, error: err});
+        }
+    }
+
+    /**
+     * 
+     * @param {Request} req 
+     * @param {Response} res 
+     */
+    static async renewSubscription(req, res) {
+        const { paymentMethodId } = req.body;
+        try {
+            const decoded = Authorization.decodeToken(req.headers.authorization);
+            const email = decoded.email;
+            const id = decoded.id;
+
+            if (!email) throw "Email is missing from token";
+            if (!paymentMethodId) throw "Payment method id is required";
+
+            const profile = await prisma.profile.findUnique({
+                where: {
+                    userId: +id
+                },
+                include: {
+                    userAccount: {
+                        select: {
+                            stripeId: true
+                        }
+                    }
+                }
+            });
+
+            if (!profile) throw "Cannot find profile with the token";
+
+            const subscription = await stripe.subscriptions.create({
+                customer: profile.userAccount.stripeId,
+                items: [
+                    {
+                        price: 'price_1QN47qALN5ZJppZ0kdzc8AtO'
+                    }
+                ],
+            });
+
+            if (!subscription) throw "Something went wrong when renewing the subscription";
+
+            res.status(200).json({status: true, message: "Subscription renewed"});
+        } catch (err) {
+            res.status(400).json({status: false, error: err});
+        }
+    }
+
+    /**
+     * 
+     * @param {Request} req 
+     * @param {Response} res 
+     */
+    static async getPaymentMethods(req, res) {
+        try {
+            const decoded = Authorization.decodeToken(req.headers.authorization);
+            const email = decoded.email;
+
+            if (!email) throw "Email is not present in the token";
+
+            const user = await prisma.userAccount.findUnique({
+                where: {
+                    email
+                }
+            });
+
+            if (!user) throw "User does not exist";
+
+            const paymentMethods = await stripe.paymentMethods.list({
+                customer: user.stripeId
+            });
+
+            res.status(200).json({status: true, message: "List of payment methods", data: paymentMethods.data});
+        } catch (err) {
+            res.status(400).json({status: false, error: err});
+        }
     }
 }
 

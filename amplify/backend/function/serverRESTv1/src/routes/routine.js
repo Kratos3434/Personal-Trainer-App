@@ -1,14 +1,17 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const Routine = require('../controller/Routine');
-const DailyRoutine = require('../controller/DailyRoutine');
-const Algorithm = require('../controller/Algorithm');
+const Routine = require("../controller/Routine");
+const DailyRoutine = require("../controller/DailyRoutine");
+const Algorithm = require("../controller/Algorithm");
 
 // Save Weekly Routine to db
 router.post("/save", Routine.saveWeeklyRoutine);
 
 // Get workout environment from db
 router.get("/workoutEnv", Routine.getWorkoutEnv);
+
+// Get Exercise string Description by exerciseId
+router.get("/exerciseDescription/:exerciseId", Routine.getExerciseDescByExerciseId);
 
 // Get equipment status from db
 router.get("/muscleGroup", Routine.getMuscleGroup);

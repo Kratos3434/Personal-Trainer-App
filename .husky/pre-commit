@@ -1,0 +1,2 @@
+cd amplify/backend/function/serverRESTv1/src
+npx lint-staged
