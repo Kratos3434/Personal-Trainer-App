@@ -1,6 +1,7 @@
 const prisma = require('../prismaInstance');
 const Authorization = require('./Authorization');
 const { Request, Response } = require('express');
+const stripe = require('stripe')(process.env.STRIPE_TEST_SECRET_KEY);
 
 class Profile {
     /**
@@ -45,7 +46,6 @@ class Profile {
      */
     static async getByToken(req, res) {
         const { initBodyMeasurement } = req.query;
-
         try {
             const decoded = Authorization.decodeToken(req.headers.authorization);
             const userId = decoded.id;
@@ -58,7 +58,8 @@ class Profile {
                     initBodyMeasurement: initBodyMeasurement === 'true' ? true : false,
                     userAccount: {
                         select: {
-                            email: true
+                            email: true,
+                            stripeId: true
                         }
                     }
                 }
@@ -66,7 +67,21 @@ class Profile {
 
             if (!profile) throw "Profile does not exist";
 
-            res.status(200).json({status: true, data: profile, message: "Profile retrieved"});
+            let subscriptionStatus = 'unknown';
+
+            if (profile.userAccount.stripeId) {
+                const subscriptions = await stripe.subscriptions.list({
+                    customer: profile.userAccount.stripeId
+                });
+                const subscription = subscriptions.data[0];
+                if (subscription.cancel_at_period_end) {
+                    subscriptionStatus = 'canceled';
+                } else {
+                    subscriptionStatus = subscription.status;
+                }
+            }
+
+            res.status(200).json({status: true, data: {...profile, subscriptionStatus}, message: "Profile retrieved"});
         } catch (err) {
             res.status(400).json({status: false, error: err});
         }

@@ -20,6 +20,7 @@ model UserAccount {
   password  String
   profile Profile?
   otp OTP?
+  stripeId String?
   verified  Boolean   @default(false)
   provider String?
   createdAt DateTime  @default(now())
