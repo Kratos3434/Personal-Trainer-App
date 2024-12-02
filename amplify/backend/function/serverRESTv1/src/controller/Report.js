@@ -180,7 +180,7 @@ class Report {
             data: {
               startDate: result.startDate,
               endDate: result.endDate,
-              progressSummary: progressSummary,
+              progressSummary: assess,
               weeklyProgressId: progressId,
             },
           });
@@ -189,10 +189,6 @@ class Report {
           console.error("Error creating report:", error);
         }
       }
-
-      console.log("-----result-----");
-      console.log(result);
-      console.log(result.progress);
 
       res.status(200).json(result);
     } catch (err) {
