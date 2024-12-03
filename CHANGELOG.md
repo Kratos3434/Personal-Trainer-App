@@ -5,13 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [1.3.0] - 2024-12-02
 
 ### Added
-- 
+- Exercise Library Page (https://github.com/Kratos3434/Personal-Trainer-App/issues/78).
+- Light and Dark Modes (https://github.com/Kratos3434/Personal-Trainer-App/issues/79).
+
+### Fixed
+- Fix Progress Analysis Page's performance issue (https://github.com/Kratos3434/Personal-Trainer-App_Frontend/commit/cdf0b06613c6d3295405b9b144692e9c51ae585d).
+- Fix ESLint warnings and errors.
 
 ### Changed
-- 
+- Add the missing height change option on Profile Edit Page (https://github.com/Kratos3434/Personal-Trainer-App/issues/92).
+- Enhance overall UI/UX CSS (https://github.com/Kratos3434/Personal-Trainer-App/issues/79).
+- Re-import most of the exercise videos to ensure instructive types (https://github.com/Kratos3434/Personal-Trainer-App/issues/80).
+- Add initial body measurement data set as the starting record of progress chart (https://github.com/Kratos3434/Personal-Trainer-App_Frontend/commit/5ef0f858c534ed4dc713913d29fa1aebcc5c2374).
+- Add the missing height change option on Edit Profile page (https://github.com/Kratos3434/Personal-Trainer-App_Frontend/commit/a3249918502868a8f111fea5965defcc7289b55e).
+- Edit Fitness Result page to use a similar UI sytle as the Report page for readability (https://github.com/Kratos3434/Personal-Trainer-App_Frontend/commit/3c2ce22a1c574a7beeb26f47b82805dddf197dd5).
 
 ### Removed
 -
