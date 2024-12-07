@@ -8,10 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-- 
+- Source code linter, formatter, and pre-commit hooks for both the frontend and backend (https://github.com/Kratos3434/Personal-Trainer-App/issues/84).
 
 ### Changed
-- 
+- Updated the Body Fat Chart UI to display gender-specific information. (https://github.com/Kratos3434/Personal-Trainer-App/issues/86).
 
 ### Removed
 -
