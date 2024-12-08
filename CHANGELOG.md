@@ -17,6 +17,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Removed
 - Debugging comments and codes for Daily Routine, Report, Profile Entry pages and APIs(https://github.com/Kratos3434/Personal-Trainer-App/issues/83)
 
+### Fixed
+- Incorrect data display, and UI on Report Page (https://github.com/Kratos3434/Personal-Trainer-App/issues/90)
+  
 ## [1.2.0] - 2024-11-11
 
 ### Added
