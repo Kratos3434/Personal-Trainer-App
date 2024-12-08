@@ -12,9 +12,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - Updated the Body Fat Chart UI to display gender-specific information. (https://github.com/Kratos3434/Personal-Trainer-App/issues/86).
-
+- Improve Report UI with a new feature(https://github.com/Kratos3434/Personal-Trainer-App/issues/81)
+- Improve Report API to support new feature(https://github.com/Kratos3434/Personal-Trainer-App/issues/82)
 ### Removed
--
+- Debugging comments and codes for Daily Routine, Report, Profile Entry pages and APIs(https://github.com/Kratos3434/Personal-Trainer-App/issues/83)
 
 ## [1.2.0] - 2024-11-11
 
