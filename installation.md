@@ -4,6 +4,12 @@
 
 # Front End App
 The personal trainer app is generated using react native expo. You can start it locally or directly donwload the APK for android.
+<br><br>
+
+**Demo / Test Account:** <br>
+- Login: jake@mail.com <br>
+- Password: Password1234
+<br><br>
 
 **Local Installation**
 - Go to your CMD or command line and type:
