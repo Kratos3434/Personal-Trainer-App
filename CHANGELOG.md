@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Exercise Library Page (https://github.com/Kratos3434/Personal-Trainer-App/issues/78).
 - Light and Dark Modes (https://github.com/Kratos3434/Personal-Trainer-App/issues/79).
 - Source code linter, formatter, and pre-commit hooks for both the frontend and backend (https://github.com/Kratos3434/Personal-Trainer-App/issues/84).
+- Subscription (https://github.com/Kratos3434/Personal-Trainer-App/issues/87).
 
 ### Changed
 - Add the missing height change option on Profile Edit Page (https://github.com/Kratos3434/Personal-Trainer-App/issues/92).
