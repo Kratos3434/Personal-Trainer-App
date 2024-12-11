@@ -45,10 +45,11 @@ The personal trainer app is generated using react native expo. You can start it 
 **Offline download**
 - To run the app as a standalone app without starting any server, you can download this apk by scanning this qr code on your android phone:
 
-![adobe-express-qr-code](https://github.com/user-attachments/assets/79353cf0-8b4a-4aaa-b06f-7ce9d8faeae9)
+![adobe-express-qr-code (1)](https://github.com/user-attachments/assets/bf3c609c-85e1-4a49-861e-1d14e9fc03f4)
+
 
 - If the qr code doesn't work you can directly visit this link:
-**https://seneca-my.sharepoint.com/:u:/r/personal/kwcarlos_myseneca_ca/Documents/Microsoft%20Teams%20Chat%20Files/application-94a21a88-4b65-4788-9e37-e836257adf38.apk?csf=1&web=1&e=2akzU8**
+**https://seneca-my.sharepoint.com/:u:/g/personal/kwcarlos_myseneca_ca/EXvJ82qb34pOjUwgz2Gq3BoBaYa5VadPJw-i0ZhNUy9-mg?e=ODz1Zn**
 
 
 # Back End 
